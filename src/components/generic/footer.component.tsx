@@ -1,0 +1,80 @@
+'use client';
+
+import { Container, Group, Text, Anchor, Divider, Image, Stack, rem } from '@mantine/core';
+import { IconBrandFacebook, IconBrandInstagram } from '@tabler/icons-react';
+
+export default function Footer() {
+  return (
+    <footer
+      style={{
+        backgroundColor: '#1E3A3A', // dark teal-like tone
+        color: 'white',
+        paddingTop: rem(32),
+        paddingBottom: rem(32),
+      }}
+    >
+      <Container size="lg">
+        {/* Top description section */}
+        <Stack gap="xs">
+          <Text fw={600} fz="lg">
+            Pixsabook Cloud Album - Memories for lifetime
+          </Text>
+
+          <Text c="gray.3" fz="sm" maw={900}>
+            Pixsabook is a cloud album to preserve your favorite moments lifelong and share the same with
+            friends and family in a perfect elegant way as traditional Album Books. For more questions,
+            queries and suggestions, please reach our to us at{' '}
+            <Anchor href="mailto:pixsabooksys@gmail.com" c="blue.4" underline="hover">
+              pixsabooksys@gmail.com
+            </Anchor>{' '}
+            or{' '}
+            <Anchor
+              href="https://www.facebook.com/tamajitphotography"
+              c="blue.4"
+              underline="hover"
+              target="_blank"
+            >
+              Tamajit Photography on Facebook
+            </Anchor>
+            . Also let us know if you want to collaborate and contribute in any way.
+          </Text>
+        </Stack>
+
+        <Divider my="md" color="gray.5" />
+        
+            
+        {/* Bottom section */}
+        <Group justify="space-between" wrap="wrap" align="center">
+          {/* Left side */}
+          <Image src="/assets/images/logo_text.png" alt="pixsabook logo" h={50} fit="contain" />
+          <Group align="center" gap="sm">
+            <Group gap="lg" visibleFrom="sm">
+              <Anchor href="#" c="white" fz="sm" underline="hover">
+                Help & Support
+              </Anchor>
+              <Anchor href="#" c="white" fz="sm" underline="hover">
+                Terms & Conditions
+              </Anchor>
+              <Anchor href="#" c="white" fz="sm" underline="hover">
+                Privacy Policy
+              </Anchor>
+              <Anchor href="#" c="white" fz="sm" underline="hover">
+                Contact Us
+              </Anchor>
+            </Group>
+          </Group>
+
+          {/* Right side */}
+          <Group gap="md">
+            <Anchor href="https://www.facebook.com/tamajitphotography" target="_blank" c="white">
+              <IconBrandFacebook size={22} />
+            </Anchor>
+            <Anchor href="https://www.facebook.com/tamajitphotography" target="_blank" c="white">
+              <IconBrandInstagram size={22} color="#F56040" />
+            </Anchor>
+          </Group>
+        </Group>
+      </Container>
+    </footer>
+  );
+}

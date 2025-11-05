@@ -1,0 +1,95 @@
+
+.heart {
+  position: relative;
+  /* background: yellow; */
+}
+
+.heartBackdrop {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* background: green; */
+  width: 36px;
+  height: 36px;
+  /* padding: 1rem; */
+  border-radius: 100%;
+  transform: scale(2.2) translateY(-0.25px);
+  opacity: 0.1;
+  transition: all 0.32s ease;
+}
+
+.bubbleWrapper {
+  box-sizing: border-box;
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+}
+
+.bubble {
+  box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  width: 3rem;
+  min-width: 3rem;
+  height: 3rem;
+  /* background-color: chartreuse; */
+  /* border: 2px solid transparent; */
+  border-style: solid;
+  /* border-color: teal; */
+  border-width: 0px;
+  border-radius: 100%;
+  opacity: 1;
+  pointer-events: none;
+}
+
+.sparkWrapper {
+  box-sizing: border-box;
+  display: flex;
+  justify-content: center;
+  position: absolute;
+  /* border: 1px dotted rgba(255, 42, 255, 0.582); */
+  width: 36px;
+  height: 36px;
+  opacity: 1;
+  scale: 2;
+  border-radius: 100%;
+  /* overflow: hidden; */
+}
+
+.sparkGroup {
+  display: flex;
+  justify-content: center;
+  gap: 1px;
+  height: min-content;
+  /* background: yellow; */
+  overflow: hidden;
+}
+
+.spark {
+  width: 3px;
+  height: 3px;
+  /* background: red; */
+  /* border: 1px solid red; */
+  border-radius: 100%;
+}
+
+.labelClipper {
+  position: absolute;
+  /* right: -3rem; */
+  bottom: 0;
+  height: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: flex-end;
+  /* background: green; */
+  overflow: hidden;
+}
+
+svg > path {
+  transition: stroke 0.32s ease;
+}

@@ -1,0 +1,32 @@
+@import "tailwind-preset-mantine";
+@import '@mantine/nprogress/styles.css';
+@import '@mantine/dropzone/styles.css';
+@font-face {
+  font-family: 'SandorTrial';
+  src: local('SandorTrial'), url(/assets/fonts/SandorTrial.ttf) format('opentype');
+}
+@font-face {
+  font-family: 'NotoSans';
+  src: local('NotoSans'), url(/assets/fonts/NotoSans.ttf) format('opentype');
+  size: 68px;
+}
+@font-face {
+  font-family: 'VarelaRound-Regular';
+  src: local('VarelaRound-Regular'), url(/assets/fonts/VarelaRound-Regular.ttf) format('opentype');
+  size: 68px;
+}
+@font-face {
+  font-family: 'BerkshireSwash-Regular';
+  src: local('BerkshireSwash-Regular'), url(/assets/fonts/BerkshireSwash-Regular.ttf) format('opentype');
+  size: 68px;
+}
+.ribbon-container {
+  background-color: #f8f8f8;
+  border-radius: 5px;
+  box-shadow: 0 5px 5px -5px #00000088;
+  border: solid 1px #dddddd;
+}
+.ribbon {
+  z-index: 9999;
+}
+
