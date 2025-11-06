@@ -8,7 +8,7 @@ import {
 } from "@/store/slices/master.slice";
 import { errorAlert, successAlert } from "@/utils/alert.util";
 import LoadingDialog, { CanShowLoadingModal } from "./loading-pop.component";
-import { createAlbum } from "@/store/slices/album.slice";
+import { createOrUpdateAlbum } from "@/store/slices/album.slice";
 
 export default function StepperBottom(form: any) {
   const dispatch = useAppDispatch();
@@ -187,7 +187,7 @@ export default function StepperBottom(form: any) {
                         form.data.setFieldValue("photos", photoUrls);
                         //Create album now
                         dispatch(
-                          createAlbum({
+                          createOrUpdateAlbum({
                             form: form.data.values,
                             photoUrls: photoUrls,
                             coverUrl : cover,
