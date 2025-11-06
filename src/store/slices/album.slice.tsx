@@ -1,13 +1,12 @@
-import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import axios from "axios";
-import { AppUser } from "@/model/user.model";
-import { baseUrl } from "@/utils/utils";
 import { Album } from "@/model/album.model";
+import { baseUrl } from "@/utils/utils";
 
 export type AlbumState = {
-  readonly albums: Album[]; // You can replace 'any' with your Album interface
-  readonly isLoading: boolean;
-  readonly error: string | null;
+  albums: Album[];
+  isLoading: boolean;
+  error: string | null;
 };
 
 export const ALBUM_INITIAL_STATE: AlbumState = {
@@ -16,90 +15,102 @@ export const ALBUM_INITIAL_STATE: AlbumState = {
   error: null,
 };
 
-export const getAlbumsByUserId = createAsyncThunk(
-  "album/getAlbumsByUserId",
-  async ({ userId, pageType }: { userId: number, pageType : string }) => {
-    try {
-      const response = await axios.get(
-        baseUrl + `album/getAlbumsByUserId/${userId}/${pageType}`,
-      );
-      return response.data;
-    } catch (error) {
-      console.error(error);
-    }
-  },
-);
-
-export const updateAlbumByField = createAsyncThunk<
-  any, // You can replace this with your Album interface
-  { albumId: any; fieldname: string ; fieldValue: any ,currentUserId: number},
+// GET albums by userId
+export const getAlbumsByUserId = createAsyncThunk<
+  Album[],
+  { userId: number; pageType: string },
   { rejectValue: string }
->(
-  "album/updateAlbumByField",
-  async ({ albumId, fieldname, fieldValue, currentUserId }, { rejectWithValue }) => {
-    try {
-      
-      const response = await axios.post(`${baseUrl}album/updateAlbumByField`, 
-        {albumId,
-        fieldname,
-        fieldValue,
-        currentUserId});
-
-      return response.data;
-    } catch (error: any) {
-      console.error("Album updation failed:", error);
-      return rejectWithValue(
-        error.response?.data?.message || "Failed to create album",
-      );
-    }
-  },
-);
-
-
-export const createAlbum = createAsyncThunk<
-  any, // You can replace this with your Album interface
-  { form: any; photoUrls: string[]; coverUrl: string; backUrl: string },
-  { rejectValue: string }
->(
-  "album/createAlbum",
-  async ({ form, photoUrls, coverUrl, backUrl }, { rejectWithValue }) => {
-    try {
-      // Send as a proper POST body, not params
-      const payload = {
-        ...form,
-        photoUrls,
-        coverUrl,
-        backUrl,
-      };
-
-      const response = await axios.post(`${baseUrl}album/createAlbum`, payload);
-
-      return response.data;
-    } catch (error: any) {
-      console.error("Album creation failed:", error);
-      return rejectWithValue(
-        error.response?.data?.message || "Failed to create album",
-      );
-    }
-  },
-);
-
-// ✅ Async thunk to toggle like
-export const toggleLikeOptimistic = createAsyncThunk<
-  { albumId: number; email: string },
-  { albumId: number; email: string }
->("album/toggleLikeOptimistic", async ({ albumId, email }, { rejectWithValue }) => {
+>("album/getAlbumsByUserId", async ({ userId, pageType }, { rejectWithValue }) => {
   try {
-    const res = await axios.post(`${baseUrl}album/toggle-like`, {
-        albumId,
-        email,
-      });
-    return { albumId, email };
+    const response = await axios.get(`${baseUrl}album`, {
+      params: { method: "getAlbumsByUserId", userId, pageType },
+    });
+    return response.data;
   } catch (err: any) {
-    return rejectWithValue(err.response?.data || err.message);
+    console.error(err);
+    return rejectWithValue(err.response?.data?.message || "Failed to fetch albums");
   }
 });
 
+// GET album by id
+export const getAlbumById = createAsyncThunk<
+  Album,
+  { id: number },
+  { rejectValue: string }
+>("album/getAlbumById", async ({ id }, { rejectWithValue }) => {
+  try {
+    const response = await axios.get(`${baseUrl}album`, {
+      params: { method: "getAlbumById", id },
+    });
+    return response.data;
+  } catch (err: any) {
+    console.error(err);
+    return rejectWithValue(err.response?.data?.message || "Failed to fetch album");
+  }
+});
+
+// CREATE or UPDATE album
+export const createOrUpdateAlbum = createAsyncThunk<
+  any,
+  {
+    id?: number;
+    form: any;
+    photoUrls: string[];
+    coverUrl: string;
+    backUrl: string;
+    creatorEmail?: string;
+    clientEmail?: string;
+    inviteeList?: string[];
+  },
+  { rejectValue: string }
+>("album/createOrUpdateAlbum", async (payload, { rejectWithValue }) => {
+  try {
+    const response = await axios.post(`${baseUrl}album`, {
+      ...payload,
+      method: "createAlbum",
+    });
+    return response.data;
+  } catch (err: any) {
+    console.error(err);
+    return rejectWithValue(err.response?.data?.message || "Failed to create/update album");
+  }
+});
+
+// UPDATE album field (like isPublished or viewers)
+export const updateAlbumByField = createAsyncThunk<
+  any,
+  { albumId: number; fieldname: string; fieldValue: any; currentUserId: number },
+  { rejectValue: string }
+>("album/updateAlbumByField", async (payload, { rejectWithValue }) => {
+  try {
+    const response = await axios.post(`${baseUrl}album`, {
+      ...payload,
+      method: "updateAlbumByField",
+    });
+    return response.data;
+  } catch (err: any) {
+    console.error(err);
+    return rejectWithValue(err.response?.data?.message || "Failed to update album");
+  }
+});
+
+// TOGGLE like on album
+export const toggleLike = createAsyncThunk<
+  any,
+  { albumId: number; email: string },
+  { rejectValue: string }
+>("album/toggleLike", async (payload, { rejectWithValue }) => {
+  try {
+    const response = await axios.post(`${baseUrl}album`, {
+      ...payload,
+      method: "toggleLike",
+    });
+    return response.data;
+  } catch (err: any) {
+    console.error(err);
+    return rejectWithValue(err.response?.data?.message || "Failed to toggle like");
+  }
+});
 
 const albumSlice = createSlice({
   name: "album",
@@ -107,20 +118,8 @@ const albumSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder
-      .addCase(createAlbum.pending, (state) => {
-        state.isLoading = true;
-        state.error = null;
-      })
-      .addCase(createAlbum.fulfilled, (state, action) => {
-        state.isLoading = false;
-      })
-      .addCase(createAlbum.rejected, (state, action) => {
-        state.isLoading = false;
-        state.error = action.error.message != null ? action.error.message : "";
-      })
       .addCase(getAlbumsByUserId.pending, (state) => {
         state.isLoading = true;
-        state.albums = [];
         state.error = null;
       })
       .addCase(getAlbumsByUserId.fulfilled, (state, action) => {
@@ -129,40 +128,61 @@ const albumSlice = createSlice({
       })
       .addCase(getAlbumsByUserId.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.error.message != null ? action.error.message : "";
+        state.error = action.payload || "";
       })
-      .addCase(toggleLikeOptimistic.pending, (state, action) => {
-        // 🔹 Optimistic toggle
-        const { albumId, email } = action.meta.arg;
-        const album = state.albums.find((a) => a.id === albumId);
-        if (!album) return;
-        album.likesByEmail = album.likesByEmail || [];
-        if (album.likesByEmail.includes(email)) {
-          album.likesByEmail = album.likesByEmail.filter((e) => e !== email);
-          album.rating = Math.max(0, (album.rating ?? 1) - 1);
-        } else {
-          album.likesByEmail.push(email);
-          album.rating = (album.rating ?? 0) + 1;
+      .addCase(getAlbumById.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(getAlbumById.fulfilled, (state, action) => {
+        state.isLoading = false;
+        const album = action.payload;
+        if (album) {
+          const index = state.albums.findIndex((a) => a.id === album.id);
+          if (index >= 0) state.albums[index] = album;
+          else state.albums.push(album);
         }
       })
-      .addCase(toggleLikeOptimistic.fulfilled, (state, action) => {
-        // ✅ Do nothing. Local state already updated.
+      .addCase(getAlbumById.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload || "";
       })
-      .addCase(toggleLikeOptimistic.rejected, (state, action) => {
-        // 🔹 Rollback on failure
-        const { albumId, email } = action.meta.arg;
+      .addCase(createOrUpdateAlbum.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(createOrUpdateAlbum.fulfilled, (state) => {
+        state.isLoading = false;
+      })
+      .addCase(createOrUpdateAlbum.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload || "";
+      })
+      .addCase(updateAlbumByField.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(updateAlbumByField.fulfilled, (state) => {
+        state.isLoading = false;
+      })
+      .addCase(updateAlbumByField.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload || "";
+      })
+      .addCase(toggleLike.pending, (state) => {
+        state.error = null;
+      })
+      .addCase(toggleLike.fulfilled, (state, action) => {
+        const { albumId, liked, likesByEmail } = action.payload;
         const album = state.albums.find((a) => a.id === albumId);
-        if (!album) return;
-        album.likesByEmail = album.likesByEmail || [];
-        if (album.likesByEmail.includes(email)) {
-          album.likesByEmail = album.likesByEmail.filter((e) => e !== email);
-          album.rating = Math.max(0, (album.rating ?? 1) - 1);
-        } else {
-          album.likesByEmail.push(email);
-          album.rating = (album.rating ?? 0) + 1;
+        if (album) {
+          album.likesByEmail = likesByEmail;
+          album.rating = likesByEmail.length;
         }
-        state.error = action.payload as string;
-      });;
+      })
+      .addCase(toggleLike.rejected, (state, action) => {
+        state.error = action.payload || "";
+      });
   },
 });
 

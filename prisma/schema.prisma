@@ -1,0 +1,90 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum BooleanFlag {
+  Yes
+  No
+}
+
+enum Role {
+  Viewer
+  Editor
+  Admin
+}
+
+model User {
+  id                Int         @id @default(autoincrement())
+  userType          Role
+  resetPasswordFlag Int         @default(0)
+  resetPasswordCode String?
+  name              String?
+  photo             String?
+  thumbnailUrl      String?
+  active            BooleanFlag @default(Yes)
+  email             String?     @unique
+  mobile            String?     @unique
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @default(now())
+  createdBy         Int
+  updatedBy         Int
+
+  // Back relations
+  createdAlbums    Album[]            @relation("UserCreater")
+  clientAlbums     Album[]            @relation("UserClient")
+  viewedAlbums     Album[]            @relation("Viewers")
+  UserSubscription UserSubscription[]
+}
+
+model Album {
+  id           Int         @id @default(autoincrement())
+  albumName    String?
+  albumDesc    String?
+  active       BooleanFlag @default(Yes)
+  isPublished  BooleanFlag @default(No)
+  coverImage   String?
+  backImage    String?
+  imageUrls    Json?
+  likesByEmail Json?
+  rating       Int         @default(0)
+  pin          Int         @default(0)
+  createdBy    User        @relation("UserCreater", fields: [createdById], references: [id])
+  createdById  Int
+
+  client   User @relation("UserClient", fields: [clientId], references: [id])
+  clientId Int
+
+  viewers User[] @relation("Viewers")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+  updatedBy Int
+}
+
+model SubscriptionPlan {
+  id               Int                @id @default(autoincrement())
+  name             String
+  price            Int
+  albumsCredit     Int
+  validityDays     Int
+  colorCode        String?
+  description      String?
+  active           BooleanFlag        @default(Yes)
+  UserSubscription UserSubscription[]
+}
+
+model UserSubscription {
+  id          Int              @id @default(autoincrement())
+  userId      Int
+  planId      Int
+  creditsLeft Int
+  expiresOn   DateTime? // if unlimited, valid only till this
+  startDate   DateTime         @default(now())
+  User        User             @relation(fields: [userId], references: [id])
+  Plan        SubscriptionPlan @relation(fields: [planId], references: [id])
+}

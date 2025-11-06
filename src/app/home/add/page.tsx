@@ -333,13 +333,11 @@ export default function CreateEditorPage() {
                   }}
                 />
               </Input.Wrapper>
-              <Space h="md" />
               <Divider
                 my="xs"
                 label="Creator Details"
                 labelPosition="center"
               />
-              <Space h="md" />
               {selectedCreator !== null && selectedCreator !== undefined && (
                 <>
                   <UserInfo user={selectedCreator} />

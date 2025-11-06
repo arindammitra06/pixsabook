@@ -102,6 +102,7 @@ export default function AlbumGallery(props) {
       }),
     ).then((res: any) => {
       dispatch(fetchUserById({ id: currentUser!.id! })).then((res: any) => {
+        console.log(res);
         nprogress.complete();
       });
       if (res.payload.status) {

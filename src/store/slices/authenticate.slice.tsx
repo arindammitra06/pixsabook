@@ -21,7 +21,7 @@ export const getOTP = createAsyncThunk(
   "auth/getOTP",
   async ({ email }: { email: string }) => {
     try {
-      const response = await axios.post(baseUrl + `auth/getOTP`, {
+      const response = await axios.post(baseUrl + `auth`, {
         params: {
           email,
         },
@@ -33,14 +33,39 @@ export const getOTP = createAsyncThunk(
   },
 );
 
+// ✅ Update user by field
+export const updateUserByField = createAsyncThunk<
+  any,
+  { id: number; fieldname: string; fieldValue: any; currentUserId: number },
+  { rejectValue: string }
+>("user/updateUserByField", async (payload, { rejectWithValue }) => {
+  try {
+    const response = await axios.post(`${baseUrl}user`, {
+      ...payload,
+      action: "updateUserByField",
+    });
+    return response.data;
+  } catch (err: any) {
+    console.error("User updation failed:", err);
+    return rejectWithValue(
+      err.response?.data?.message || "Failed to update user",
+    );
+  }
+});
+
+// ✅ Fetch user by ID
 export const fetchUserById = createAsyncThunk(
-  "auth/fetchUserById",
-  async ({ id }: { id: number }) => {
+  "user/fetchUserById",
+  async ({ id }: { id: number }, { rejectWithValue }) => {
     try {
-      const response = await axios.get(baseUrl + `user/fetchUserById/${id}`);
+      const response = await axios.post(baseUrl + `user/fetchUserById`, {
+        id,
+        action: "fetchUserById",
+      });
       return response.data;
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
+      return rejectWithValue(error.message || "Failed to fetch user");
     }
   },
 );
@@ -76,6 +101,20 @@ const authSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
+      // update user by field
+      .addCase(updateUserByField.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(updateUserByField.fulfilled, (state, action) => {
+        console.log(action);
+        state.isLoading = false;
+        state.currentUser = action.payload.data.updatedUser;
+      })
+      .addCase(updateUserByField.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload || "";
+      })
       .addCase(fetchUserById.pending, (state) => {
         state.isLoading = true;
         state.error = null;

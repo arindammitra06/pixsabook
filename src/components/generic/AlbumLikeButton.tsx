@@ -2,9 +2,8 @@ import React from "react";
 import { ActionIcon,Avatar,HoverCard,Text } from "@mantine/core";
 import { IconHeart, IconHeartFilled } from "@tabler/icons-react";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { toggleLikeOptimistic } from "@/store/slices/album.slice";
-import { AnimatedHeart } from "./heart";
 import { t } from "i18next";
+import { toggleLike } from "@/store/slices/album.slice";
 interface LikeButtonProps {
   albumId: number;
 }
@@ -26,7 +25,7 @@ const LikeButton: React.FC<LikeButtonProps> = ({ albumId }) => {
       alert("Please log in to like albums.");
       return;
     }
-    dispatch(toggleLikeOptimistic({ albumId, email }));
+    dispatch(toggleLike({ albumId, email }));
   };
 
   return (

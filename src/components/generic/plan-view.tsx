@@ -42,6 +42,7 @@ export function PlanView({
 
   const dispatch = useAppDispatch();
   const [plans, setPlans] = useState<any[]>([]);
+  console.log(plans)
   useEffect(() => {
     dispatch(getSubscriptionPlans()).then((response: any) => {
       setPlans(response.payload);

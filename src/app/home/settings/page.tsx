@@ -1,7 +1,7 @@
 "use client";
 
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { signOut } from "@/store/slices/authenticate.slice";
+import { signOut, updateUserByField } from "@/store/slices/authenticate.slice";
 import { changeLanguage } from "@/store/slices/language.slice";
 import {
   setColorSchemeLocal,
@@ -45,7 +45,6 @@ import { useTranslation } from "react-i18next";
 import "react-phone-number-input/style.css";
 import PhoneInput from "react-phone-number-input";
 import { uploadImageToImageKit } from "@/store/slices/master.slice";
-import { updateUserByField } from "@/store/slices/user.slice";
 import { modals } from "@mantine/modals";
 
 interface SettingItemProps {
