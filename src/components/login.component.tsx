@@ -143,11 +143,6 @@ export default function LoginPage() {
             <Grid.Col span={largeScreen ? 4 : 12}>
               <Paper
                 style={{
-                  borderRight: `${rem(1)} solid ${
-                    colorScheme === "dark"
-                      ? theme.colors.dark[7]
-                      : theme.colors.gray[3]
-                  }`,
                   minHeight: "95vh",
                   maxWidth: rem(500),
                   paddingTop: rem(150),

@@ -7,10 +7,11 @@ export default function Footer() {
   return (
     <footer
       style={{
-        backgroundColor: '#1E3A3A', // dark teal-like tone
+        backgroundColor: '#0a0a0c', // dark teal-like tone
         color: 'white',
         paddingTop: rem(32),
         paddingBottom: rem(32),
+        borderTop: '0.5px solid #383c3f'
       }}
     >
       <Container size="lg">
@@ -40,7 +41,7 @@ export default function Footer() {
           </Text>
         </Stack>
 
-        <Divider my="md" color="gray.5" />
+        <Divider my="md" color="#383c3f" />
         
             
         {/* Bottom section */}

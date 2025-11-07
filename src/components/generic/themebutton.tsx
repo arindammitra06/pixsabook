@@ -3,7 +3,7 @@ import { IconSun, IconMoon } from '@tabler/icons-react';
 
 export function ThemeButton() {
   const { setColorScheme } = useMantineColorScheme();
-  const colorScheme = useComputedColorScheme('light', { getInitialValueInEffect: true });
+  const colorScheme = useComputedColorScheme('dark', { getInitialValueInEffect: true });
 
   return (
     <ActionIcon

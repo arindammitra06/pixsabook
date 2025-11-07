@@ -30,19 +30,20 @@ export default function ProviderLayout({
   const currentUser = useAppSelector((state) => state.auth.currentUser);
   const router = useRouter();
   const dispatch = useAppDispatch();
-  
 
+  console.log(defaultLight.colorScheme);
   useEffect(() => {
     i18next.changeLanguage(language);
   }, [language, currentUser, router, dispatch]);
 
   return (
     <>
-      <ColorSchemeScript 
+      <ColorSchemeScript
         defaultColorScheme={currentColorScheme ?? defaultLight.colorScheme}
         forceColorScheme={currentColorScheme ?? defaultLight.colorScheme}
-        />
+      />
       <MantineProvider
+        defaultColorScheme={currentColorScheme ?? defaultLight.colorScheme}
         theme={{
           ...(currentTheme ?? defaultLight.theme),
         }}

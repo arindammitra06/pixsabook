@@ -13,7 +13,7 @@ export type ThemeState = {
 
 export const THEME_INITIAL_STATE: ThemeState = {
   theme: defaultLight.theme,
-  colorScheme: defaultLight.colorScheme,
+  colorScheme: 'dark',
   themeLoading: false,
   temptheme: null,
   imageQuality: "high",
