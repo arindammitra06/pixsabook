@@ -11,6 +11,7 @@ export type AppUser= {
     resetPasswordCode?: string;
     name: string;
     photo?: string;
+    location?: string;
     thumbnailUrl?:string,
     active: number;
     email?: string;

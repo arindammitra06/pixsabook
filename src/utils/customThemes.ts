@@ -1,7 +1,7 @@
 import { MantineThemeOverride } from "@mantine/core";
 
 export const defaultLight: any = {
-  colorScheme: "light",
+  colorScheme: "dark",
   theme: {
     fontFamily: "VarelaRound-Regular",
     primaryShade: { light: 7, dark: 9 },

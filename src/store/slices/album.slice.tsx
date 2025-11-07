@@ -53,20 +53,19 @@ export const getAlbumById = createAsyncThunk<
 export const createOrUpdateAlbum = createAsyncThunk<
   any,
   {
-    id?: number;
     form: any;
     photoUrls: string[];
     coverUrl: string;
     backUrl: string;
-    creatorEmail?: string;
-    clientEmail?: string;
-    inviteeList?: string[];
   },
   { rejectValue: string }
->("album/createOrUpdateAlbum", async (payload, { rejectWithValue }) => {
+>("album/createOrUpdateAlbum", async ({form,photoUrls,coverUrl,backUrl}, { rejectWithValue }) => {
   try {
     const response = await axios.post(`${baseUrl}album`, {
-      ...payload,
+      form:form,
+      photoUrls:photoUrls,
+      coverUrl:coverUrl,
+      backUrl:backUrl,
       method: "createAlbum",
     });
     return response.data;

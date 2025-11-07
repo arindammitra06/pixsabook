@@ -25,6 +25,7 @@ model User {
   resetPasswordCode String?
   name              String?
   photo             String?
+  location          String?
   thumbnailUrl      String?
   active            BooleanFlag @default(Yes)
   email             String?     @unique

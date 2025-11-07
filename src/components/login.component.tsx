@@ -52,7 +52,7 @@ export default function LoginPage() {
   const [otp, setOtp] = useState(null);
   const [otpError, setOtpError] = useState(false);
   const [userFound, setUserFound] = useState(null);
-
+  console.log(otp)
   const goToPage = (url: string) => {
     router.push(url);
   };
@@ -91,7 +91,7 @@ export default function LoginPage() {
     setIsLoggingIn(true);
 
     dispatch(getOTP({ email: form.values.email })).then((res: any) => {
-      console.log(res);
+      console.log(res)
       setIsLoggingIn(false);
       nprogress.complete();
       if (res.payload.status) {
@@ -114,16 +114,19 @@ export default function LoginPage() {
   };
 
   useEffect(() => {
+    if (
+      currentUser !== null &&
+      currentUser !== undefined &&
+      currentUser.email !== null &&
+      currentUser.email !== undefined
+    ) {
+      goToPage("/home");
+    }
     setOtp(null);
     setOtpError(false);
-
-    if (currentUser !== null && currentUser !== undefined) {
-      setIsPageLoading(false);
-      //goToPage("/home");
-    } else {
-      setIsPageLoading(false);
-    }
-  }, [currentUser, router]);
+    setIsPageLoading(false);
+    
+  }, [currentUser]);
 
   const largeScreen = useMediaQuery("(min-width: 40em)");
 
@@ -211,34 +214,45 @@ export default function LoginPage() {
                         }
                       />
 
-                      {otp !== null && otp !== undefined && <Center>
-                        <PinInput
-                          size="sm"
-                          mt="sm"
-                          length={6}
-                          type="number"
-                          disabled={
-                            otp !== null && otp !== undefined ? false : true
-                          }
-                          autoFocus={
-                            otp != null && otp !== undefined ? true : false
-                          }
-                          onComplete={(value) => {
-                            if (
-                              value !== null &&
-                              value !== undefined &&
-                              value.length === 6
-                            ) {
-                              if (value === otp) {
-                                successAlert("OTP verified successfully");
-                                dispatch(
-                                  setCurrentUser({
-                                    user: userFound,
-                                    isLoggedIn: true,
-                                  }),
-                                );
-                                goToPage("/home");
-                                setOtpError(false);
+                      {otp !== null && otp !== undefined && (
+                        <Center>
+                          <PinInput
+                            size="sm"
+                            mt="sm"
+                            length={6}
+                            type="number"
+                            disabled={
+                              otp !== null && otp !== undefined ? false : true
+                            }
+                            autoFocus={
+                              otp != null && otp !== undefined ? true : false
+                            }
+                            onComplete={(value) => {
+                              if (
+                                value !== null &&
+                                value !== undefined &&
+                                value.length === 6
+                              ) {
+                                if (value === otp) {
+                                  successAlert("OTP verified successfully");
+                                  dispatch(
+                                    setCurrentUser({
+                                      user: userFound,
+                                      isLoggedIn: true,
+                                    }),
+                                  );
+                                  goToPage("/home");
+                                  setOtpError(false);
+                                } else {
+                                  setOtpError(true);
+                                  dispatch(
+                                    setCurrentUser({
+                                      user: null,
+                                      isLoggedIn: false,
+                                    }),
+                                  );
+                                  errorAlert("Invalid OTP");
+                                }
                               } else {
                                 setOtpError(true);
                                 dispatch(
@@ -249,19 +263,10 @@ export default function LoginPage() {
                                 );
                                 errorAlert("Invalid OTP");
                               }
-                            } else {
-                              setOtpError(true);
-                              dispatch(
-                                setCurrentUser({
-                                  user: null,
-                                  isLoggedIn: false,
-                                }),
-                              );
-                              errorAlert("Invalid OTP");
-                            }
-                          }}
-                        />
-                      </Center>}
+                            }}
+                          />
+                        </Center>
+                      )}
                     </FocusTrap>
                     <Checkbox
                       label={t("please-accept-terms")}

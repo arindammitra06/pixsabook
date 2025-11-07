@@ -8,13 +8,16 @@ import {
 import "../i18n/config";
 import "../app/globals.css";
 import i18next from "i18next";
-import { useAppSelector } from "@/store/hooks";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { useEffect } from "react";
 import { defaultLight } from "@/utils/customThemes";
 import { I18nextProvider } from "react-i18next";
 import { Toaster } from "react-hot-toast";
 import { NavigationProgress } from "@mantine/nprogress";
 import { ModalsProvider } from "@mantine/modals";
+import { useRouter } from "next/navigation";
+import { signOut } from "@/store/slices/authenticate.slice";
+import { successAlert } from "@/utils/alert.util";
 
 export default function ProviderLayout({
   children,
@@ -24,9 +27,14 @@ export default function ProviderLayout({
   const currentTheme = useAppSelector((state) => state.theme.theme);
   const currentColorScheme = useAppSelector((state) => state.theme.colorScheme);
   const language = useAppSelector((state) => state.language.language);
+  const currentUser = useAppSelector((state) => state.auth.currentUser);
+  const router = useRouter();
+  const dispatch = useAppDispatch();
+  
+
   useEffect(() => {
     i18next.changeLanguage(language);
-  }, [language]);
+  }, [language, currentUser, router, dispatch]);
 
   return (
     <>

@@ -34,13 +34,36 @@ export async function sendOtpEmail({
 
     const response =
       await transactionalEmailsApi.sendTransacEmail(sendSmtpEmail);
-    //console.log("OTP Email sent:", response);
     return { status: true };
   } catch (err: any) {
     console.error('OTP Email error:', err.response?.data || err);
     return { status: false, error: err.response?.data };
   }
 }
+
+export async function sendSubscriptionEmail({
+  userEmail,
+  planName,
+  credits,
+  expiry
+}: {
+  userEmail: string;
+  planName: string;
+  credits: number;
+  expiry: string;
+}) {
+  return transactionalEmailsApi.sendTransacEmail({
+    templateId: Number(process.env.BREVO_SUBSCRIPTION_TEMPLATE!), // replace with your subscription template id
+    to: [{ email: userEmail }],
+    params: {
+      "user": userEmail,
+      "planName": planName,
+      "credits": credits,
+      "expiry": expiry
+    },
+  });
+}
+
 
 export async function sendPublishEmail({
   creatorEmail,

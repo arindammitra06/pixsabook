@@ -123,7 +123,7 @@ export default function CreateEditorPage() {
     )
       .then((res: any) => {
         if (res.payload.status) {
-          console.log("User Updated:", res.payload.message);
+          
           successAlert(t("user-updated-successfully"));
           if (laodingRef.current !== null && laodingRef.current !== undefined) {
             laodingRef.current.closePopup();
@@ -174,7 +174,7 @@ export default function CreateEditorPage() {
     )
       .then((res: any) => {
         if (res.payload.status) {
-          console.log("User Updated:", res.payload.message);
+          
           successAlert(t("user-updated-successfully"));
           if (laodingRef.current !== null && laodingRef.current !== undefined) {
             laodingRef.current.closePopup();
@@ -326,7 +326,7 @@ export default function CreateEditorPage() {
                       const selectedUser = dropdownUsers.find(
                         (u) => u.id === Number(value),
                       );
-                      console.log("selectedUser", selectedUser);
+                      
                       setSelectedCreator(selectedUser);
                       setSelectedPlan(selectedUser!.UserSubscription?.[0]?.planId);
                     }

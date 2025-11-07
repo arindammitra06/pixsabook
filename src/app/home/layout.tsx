@@ -24,13 +24,13 @@ export default function RootLayout({
     <AppShell 
       padding={'lg'}
       header={{ height: 55 }}
-      navbar={{ width: 300, breakpoint: 'sm', collapsed: { mobile: !opened } }}
-      aside={{ width: 120, breakpoint: 'lg', collapsed: { desktop: false, mobile: true } }}
+      navbar={{ width: 300, breakpoint: 'sm', collapsed: { mobile: !opened },  }}
+      aside={{ width: 250, breakpoint: 'lg', collapsed: { desktop: false, mobile: true } }}
       >
       <AppShell.Header>
         <LoginMySkoolHeader opened={opened} toggle={toggle} />
       </AppShell.Header>
-      <AppShell.Navbar><NavbarSimple opened={opened} toggle={toggle}/></AppShell.Navbar>
+      <AppShell.Navbar ><NavbarSimple opened={opened} toggle={toggle}/></AppShell.Navbar>
       <AppShell.Main style={{
           overflow: 'hidden', // ensures content doesn't scroll out of layout
           boxSizing: 'border-box',

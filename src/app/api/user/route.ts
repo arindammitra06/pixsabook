@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { BooleanFlag } from "@prisma/client";
+import { sendSubscriptionEmail } from "@/utils/emailutil";
 
 export async function GET(req: NextRequest) {
   try {
@@ -71,7 +72,6 @@ export async function POST(req: NextRequest) {
 
       case "updateUserByField": {
         const userData = body;
-        console.log(userData)
         if (!userData?.id || !userData?.fieldname) {
           return NextResponse.json({
             status: false,
@@ -129,7 +129,8 @@ export async function POST(req: NextRequest) {
                 existingSub.expiresOn && existingSub.expiresOn > now
                   ? existingSub.expiresOn
                   : now;
-              await prisma.userSubscription.update({
+
+              const subscription = await prisma.userSubscription.update({
                 where: { id: existingSub.id },
                 data: {
                   planId: Number(userData.selectedPlan),
@@ -139,6 +140,18 @@ export async function POST(req: NextRequest) {
                   ),
                 },
               });
+
+              //Send email
+              await sendSubscriptionEmail({
+                userEmail: existingUser.email!,
+                planName: plan.name,
+                credits: existingSub.creditsLeft + plan.albumsCredit,
+                expiry: new Date(
+                    baseDate.getTime() + plan.validityDays * 86400000,
+                  ).toDateString(),
+              });
+
+
             } else {
               await prisma.userSubscription.create({
                 data: {
@@ -150,6 +163,15 @@ export async function POST(req: NextRequest) {
                     now.getTime() + plan.validityDays * 86400000,
                   ),
                 },
+              });
+
+              //Send email
+              await sendSubscriptionEmail({
+                userEmail: existingUser.email!,
+                planName: plan.name,
+                credits: plan.albumsCredit,
+                expiry: new Date(
+                    now.getTime() + plan.validityDays * 86400000,).toDateString(),
               });
             }
 
@@ -193,6 +215,14 @@ export async function POST(req: NextRequest) {
           },
         });
 
+        //Send email
+              await sendSubscriptionEmail({
+                userEmail: createdUser.email!,
+                planName: plan.name,
+                credits: plan.albumsCredit,
+                expiry: new Date(
+                    now.getTime() + plan.validityDays * 86400000,).toDateString(),
+              });
         return NextResponse.json({
           status: true,
           message: "Editor Created Successfully",

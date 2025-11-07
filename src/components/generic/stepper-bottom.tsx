@@ -16,12 +16,7 @@ export default function StepperBottom(form: any) {
   const laodingRef = useRef<CanShowLoadingModal>(null);
 
   const validateAndGoToNextStep = () => {
-    console.log(
-      "Validating step ",
-      form.data.values.inviteeList,
-      form.data.values.creatorEmail,
-      form.data.values.clientEmail,
-    );
+    
 
     if (form.active === 0) {
       if (
@@ -140,7 +135,6 @@ export default function StepperBottom(form: any) {
   };
 
   function createAlbumStart(form: any): void {
-    console.log(form);
     if (form.active === 3) {
       if (!form.photos || form.photos.length === 0) {
         alert(t("please-add-at-least-two-photo"));
@@ -159,7 +153,6 @@ export default function StepperBottom(form: any) {
         .then((response: any) => {
           const imagekitResponse = response.payload;
           if (imagekitResponse?.status && imagekitResponse?.url) {
-            console.log("Cover image uploaded:", imagekitResponse);
             form.data.setFieldValue("coverImageUrl", imagekitResponse.url);
             const cover = imagekitResponse.url;
 
@@ -168,14 +161,12 @@ export default function StepperBottom(form: any) {
               .then((response: any) => {
                 const imagekitResponse = response.payload;
                 if (imagekitResponse?.status && imagekitResponse?.url) {
-                  console.log("Back image uploaded:", imagekitResponse);
                   form.data.setFieldValue("backImageUrl", imagekitResponse.url);
                   const back = imagekitResponse.url;
                   
                   //Upload Photos
                   dispatch(uploadImagesSequentially(form.photos))
                     .then((response: any) => {
-                      console.log("All photos uploaded:", response.payload);
                       if (
                         response.payload !== null &&
                         response.payload !== undefined &&
@@ -195,10 +186,8 @@ export default function StepperBottom(form: any) {
                           }),
                         )
                           .then((res: any) => {
-                            console.log("Album created:", res.payload);
                             
                             if (res.payload.status) {
-                              console.log("Album created:", res.payload.message);
                               successAlert(t("album-created-successfully"));
                             } else {
                               errorAlert(t('album-creation-failed'));

@@ -30,11 +30,11 @@ import {
 import { Dropzone, MIME_TYPES } from "@mantine/dropzone";
 import {
   IconWorld,
-  IconPalette,
+  IconMapPin,
   IconPhoto,
   IconPhone,
   IconUserCircle,
-  IconTrash,
+  IconMoodHappy,
   IconLogout,
   IconChevronRight,
 } from "@tabler/icons-react";
@@ -46,6 +46,8 @@ import "react-phone-number-input/style.css";
 import PhoneInput from "react-phone-number-input";
 import { uploadImageToImageKit } from "@/store/slices/master.slice";
 import { modals } from "@mantine/modals";
+import { CitySelect } from "@/components/generic/CitySelect";
+import { nprogress } from "@mantine/nprogress";
 
 interface SettingItemProps {
   icon: React.ReactNode;
@@ -97,6 +99,7 @@ export default function SettingsPage() {
   const [tempSelection, setTempSelection] = useState("");
   const currentUser = useAppSelector((state) => state.auth.currentUser);
   const [phone, setPhone] = useState<any>(currentUser?.mobile || "");
+  const [location, setLocation] = useState<any>(currentUser?.location || "");
   const [profilePic, setProfilePic] = useState<File | null>(null);
   const { setColorScheme, clearColorScheme } = useMantineColorScheme();
 
@@ -148,7 +151,7 @@ export default function SettingsPage() {
   // ---------- Modal States ----------
   const [modalOpen, setModalOpen] = useState(false);
   const [modalType, setModalType] = useState<
-    "language" | "theme" | "imageQuality" | "phone" | "profilePic" | null
+    "language" | "theme" | "imageQuality" | "phone" | "profilePic" | "location" | null
   >(null);
 
   // ---------- Handlers ----------
@@ -168,7 +171,7 @@ export default function SettingsPage() {
   };
 
   const openSetting = (
-    type: "language" | "theme" | "imageQuality" | "phone" | "profilePic",
+    type: "language" | "theme" | "imageQuality" | "phone" | "profilePic" | "location",
   ) => {
     setModalType(type);
     if (type === "language") setTempSelection(i18n.language);
@@ -178,6 +181,8 @@ export default function SettingsPage() {
   };
 
   function savePhoneNumber() {
+    nprogress.reset();
+    nprogress.start();
     dispatch(
       updateUserByField({
         id: currentUser!.id!,
@@ -187,27 +192,63 @@ export default function SettingsPage() {
       }),
     )
       .then((res: any) => {
+
         if (res.payload.status) {
-          console.log("User Updated:", res.payload.message);
+          
           successAlert(t("user-updated-successfully"));
         } else {
           errorAlert(t("user-updation-failed"));
           console.error("User Update failed:", res.payload.message);
         }
+        nprogress.complete();
       })
       .catch((err: any) => {
         console.error("Unexpected error:", err);
         errorAlert(t("user-updation-failed"));
+        nprogress.complete();
+      });
+  }
+
+  function saveLocation() {
+    nprogress.reset();
+    nprogress.start();
+    
+    dispatch(
+      updateUserByField({
+        id: currentUser!.id!,
+        fieldname: "location",
+        fieldValue: location,
+        currentUserId: currentUser!.id!,
+      }),
+    )
+      .then((res: any) => {
+        if (res.payload.status) {
+          
+          successAlert(t("user-updated-successfully"));
+        } else {
+          errorAlert(t("user-updation-failed"));
+          console.error("User Update failed:", res.payload.message);
+        }
+        nprogress.complete();
+      })
+      .catch((err: any) => {
+        console.error("Unexpected error:", err);
+        errorAlert(t("user-updation-failed"));
+        nprogress.complete();
       });
   }
 
   function saveProfilePic() {
+    nprogress.reset();
+    nprogress.start();
+    
     dispatch(uploadImageToImageKit({ file: profilePic! }))
       .then((response: any) => {
+        
         const imagekitResponse = response.payload;
 
         if (imagekitResponse?.status && imagekitResponse?.url) {
-          console.log("Profile image uploaded:", imagekitResponse);
+          
           const profilePicUrl = imagekitResponse.url;
 
           dispatch(
@@ -220,16 +261,18 @@ export default function SettingsPage() {
           )
             .then((res: any) => {
               if (res.payload.status) {
-                console.log("User Updated:", res.payload.message);
+                
                 successAlert(t("user-updated-successfully"));
               } else {
                 errorAlert(t("user-updation-failed"));
                 console.error("User Update failed:", res.payload.message);
               }
+              nprogress.complete();
             })
             .catch((err: any) => {
               console.error("Unexpected error:", err);
               errorAlert(t("error-uploading-image"));
+              nprogress.complete();
             });
         } else {
           errorAlert(t("error-uploading-image"));
@@ -252,6 +295,9 @@ export default function SettingsPage() {
     }
     if (modalType === "profilePic") {
       saveProfilePic();
+    }
+    if (modalType === "location") {
+      saveLocation();
     }
     setModalOpen(false);
   };
@@ -330,7 +376,12 @@ export default function SettingsPage() {
               onClick={() => openSetting("phone")}
             />
             <SettingItem
-              icon={<IconUserCircle size={18} />}
+              icon={<IconMapPin size={18} />}
+              label={t("location")}
+              onClick={() => openSetting("location")}
+            />
+            <SettingItem
+              icon={<IconMoodHappy size={18} />}
               label={t("photo")}
               onClick={() => openSetting("profilePic")}
             />
@@ -369,6 +420,8 @@ export default function SettingsPage() {
                 ? t("select-field", { field: t("image-quality") })
                 : modalType === "phone"
                   ? t("add-phone")
+                  : modalType === "location"
+                  ? t("select-location")
                   : t("add-profile-pic")
         }
         centered
@@ -398,6 +451,11 @@ export default function SettingsPage() {
                 borderRadius: "4px",
                 padding: "8px",
               }}
+            />
+          )}
+
+           {modalType === "location" && (
+            <CitySelect
             />
           )}
 

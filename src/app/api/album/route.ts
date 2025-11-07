@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { BooleanFlag } from "@prisma/client";
 import { sendPublishEmail } from "@/utils/emailutil";
+import { transformValueTypes } from "framer-motion";
 
 type AlbumData = {
   id?: number;
@@ -20,8 +21,6 @@ type AlbumData = {
   email?: string;
 };
 
-
-
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const method = searchParams.get("method");
@@ -29,8 +28,7 @@ export async function GET(req: NextRequest) {
   // --- getAlbumById ---
   if (method === "getAlbumById") {
     const id = searchParams.get("id");
-    if (!id)
-      return NextResponse.json({ error: "Missing id" }, { status: 400 });
+    if (!id) return NextResponse.json({ error: "Missing id" }, { status: 400 });
 
     const album = await prisma.album.findFirst({
       where: { id: Number(id), active: BooleanFlag.Yes },
@@ -45,7 +43,10 @@ export async function GET(req: NextRequest) {
     const pageType = searchParams.get("pageType");
 
     if (!userId || !pageType)
-      return NextResponse.json({ error: "Missing parameters" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Missing parameters" },
+        { status: 400 },
+      );
 
     const uid = Number(userId);
 
@@ -59,7 +60,7 @@ export async function GET(req: NextRequest) {
         albums.map((a) => ({
           ...a,
           likesByEmail: Array.isArray(a.likesByEmail) ? a.likesByEmail : [],
-        }))
+        })),
       );
     } else {
       const albums = await prisma.album.findMany({
@@ -78,7 +79,7 @@ export async function GET(req: NextRequest) {
         albums.map((a) => ({
           ...a,
           likesByEmail: Array.isArray(a.likesByEmail) ? a.likesByEmail : [],
-        }))
+        })),
       );
     }
   }
@@ -87,7 +88,7 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  const body = (await req.json()) as { method: string } & AlbumData;
+  const body = (await req.json()) as any;
   const method = body.method;
 
   if (!method)
@@ -97,27 +98,32 @@ export async function POST(req: NextRequest) {
 
   // --- createAlbum ---
   if (method === "createAlbum") {
-    if (!body) return NextResponse.json({ status: false, message: "Missing Album Data" });
+    console.log(body);
+    if (!body)
+      return NextResponse.json({
+        status: false,
+        message: "Missing Album Data",
+      });
 
     let createrId = 0,
       clientId = 0;
     let createrObj: any, clientObj: any;
     const viewerIds: any[] = [];
 
-    if (body.id != null) {
-      const creatorResult = await getUserIdByEmail(body.creatorEmail!);
+    if (body.form !== null && body.form !== undefined) {
+      const creatorResult = await getUserIdByEmail(body.form.creatorEmail!);
       if (creatorResult) {
         createrId = creatorResult.id;
         createrObj = creatorResult.object;
       }
-      const clientResult = await getUserIdByEmail(body.clientEmail!);
+      const clientResult = await getUserIdByEmail(body.form.clientEmail!);
       if (clientResult) {
         clientId = clientResult.id;
         clientObj = clientResult.object;
       }
 
-      if (body.inviteeList?.length) {
-        for (const viewerEmail of body.inviteeList) {
+      if (body.form.inviteeList?.length) {
+        for (const viewerEmail of body.form.inviteeList) {
           const viewer = await getUserIdByEmail(viewerEmail);
           if (viewer) viewerIds.push(viewer.object);
         }
@@ -125,33 +131,42 @@ export async function POST(req: NextRequest) {
 
       if (body.id > 0) {
         await prisma.album.update({
-          where: { id: body.id },
+          where: { id: body.form.id },
           data: {
-            albumName: body.albumName,
-            albumDesc: body.albumDesc,
+            albumName: body.form.albumName,
+            albumDesc: body.form.greetingMessage,
             coverImage: body.coverUrl,
             backImage: body.backUrl,
             imageUrls: body.photoUrls,
             clientId,
-            viewers: viewerIds.length > 0 ? { connect: viewerIds.map((v) => ({ id: v.id })) } : undefined,
+            viewers:
+              viewerIds.length > 0
+                ? { connect: viewerIds.map((v) => ({ id: v.id })) }
+                : undefined,
             updatedBy: createrId,
             updatedAt: dateTime,
           },
         });
 
-        return NextResponse.json({ status: true, message: "Album Updated Successfully" });
+        return NextResponse.json({
+          status: true,
+          message: "Album Updated Successfully",
+        });
       } else {
         await prisma.album.create({
           data: {
-            albumName: body.albumName,
-            albumDesc: body.albumDesc,
+            albumName: body.form.albumName,
+            albumDesc: body.form.greetingMessage,
             active: BooleanFlag.Yes,
             coverImage: body.coverUrl,
             backImage: body.backUrl,
             imageUrls: body.photoUrls,
             createdBy: { connect: { id: createrId } },
             client: { connect: { id: clientId } },
-            viewers: viewerIds.length > 0 ? { connect: viewerIds.map((u) => ({ id: u.id })) } : undefined,
+            viewers:
+              viewerIds.length > 0
+                ? { connect: viewerIds.map((u) => ({ id: u.id })) }
+                : undefined,
             createdAt: dateTime,
             updatedAt: dateTime,
             updatedBy: createrId,
@@ -159,16 +174,25 @@ export async function POST(req: NextRequest) {
         });
       }
     } else {
-      return NextResponse.json({ status: false, message: "Missing Album Data" });
+      return NextResponse.json({
+        status: false,
+        message: "Missing Album Data",
+      });
     }
 
-    return NextResponse.json({ status: true, message: "Album Created Successfully" });
+    return NextResponse.json({
+      status: true,
+      message: "Album Created Successfully",
+    });
   }
 
   // --- updateAlbumByField ---
   if (method === "updateAlbumByField") {
     if (!body || !body.albumId)
-      return NextResponse.json({ status: false, message: "Missing Album Data" });
+      return NextResponse.json({
+        status: false,
+        message: "Missing Album Data",
+      });
 
     const albumId = body.albumId;
 
@@ -183,18 +207,28 @@ export async function POST(req: NextRequest) {
         },
       });
 
-      if (!album) return NextResponse.json({ status: false, message: "Album not found" });
+      if (!album)
+        return NextResponse.json({ status: false, message: "Album not found" });
 
       const subscription = album.createdBy.UserSubscription[0];
       if (!subscription)
-        return NextResponse.json({ status: false, message: "No active subscription found" });
+        return NextResponse.json({
+          status: false,
+          message: "No active subscription found",
+        });
 
       const now = new Date();
       if (subscription.creditsLeft <= 0)
-        return NextResponse.json({ status: false, message: "No credits left to publish album" });
+        return NextResponse.json({
+          status: false,
+          message: "No credits left to publish album",
+        });
 
       if (subscription.expiresOn && subscription.expiresOn < now)
-        return NextResponse.json({ status: false, message: "Subscription expired, please renew plan" });
+        return NextResponse.json({
+          status: false,
+          message: "Subscription expired, please renew plan",
+        });
 
       // reduce credit
       await prisma.userSubscription.update({
@@ -205,14 +239,20 @@ export async function POST(req: NextRequest) {
       // publish album
       await prisma.album.update({
         where: { id: albumId },
-        data: { isPublished: BooleanFlag.Yes, updatedBy: body.currentUserId, updatedAt: dateTime },
+        data: {
+          isPublished: BooleanFlag.Yes,
+          updatedBy: body.currentUserId,
+          updatedAt: dateTime,
+        },
       });
 
       // send email
       await sendPublishEmail({
         creatorEmail: album.createdBy.email!,
         clientEmail: album.client.email!,
-        viewersEmails: album.viewers.map((v) => v.email).filter((e): e is string => e != null),
+        viewersEmails: album.viewers
+          .map((v) => v.email)
+          .filter((e): e is string => e != null),
         name: album.albumName!,
         greeting: album.albumDesc!,
         cover: album.coverImage!,
@@ -221,7 +261,10 @@ export async function POST(req: NextRequest) {
         img3: album.imageUrls?.[2],
       });
 
-      return NextResponse.json({ status: true, message: "Album Published Successfully" });
+      return NextResponse.json({
+        status: true,
+        message: "Album Published Successfully",
+      });
     }
 
     // update viewers
@@ -232,16 +275,44 @@ export async function POST(req: NextRequest) {
         if (v) viewerIds.push(v.object);
       }
 
-      await prisma.album.update({
+      const albumFetched = await prisma.album.update({
         where: { id: albumId },
         data: {
           viewers: { set: viewerIds.map((u) => ({ id: u.id })) },
           updatedBy: body.currentUserId,
           updatedAt: dateTime,
         },
+        include: {
+          createdBy: true,
+          client: true,
+          viewers: true,
+        },
       });
+      if (
+        albumFetched !== null &&
+        albumFetched !== undefined &&
+        albumFetched.isPublished.toString() === 'Yes'
+      ) {
+        // send email
+        await sendPublishEmail({
+          creatorEmail: albumFetched.createdBy.email!,
+          clientEmail: albumFetched.client.email!,
+          viewersEmails: albumFetched.viewers
+            .map((v) => v.email)
+            .filter((e): e is string => e != null),
+          name: albumFetched.albumName!,
+          greeting: albumFetched.albumDesc!,
+          cover: albumFetched.coverImage!,
+          img1: albumFetched.imageUrls?.[0],
+          img2: albumFetched.imageUrls?.[1],
+          img3: albumFetched.imageUrls?.[2],
+        });
+      }
 
-      return NextResponse.json({ status: true, message: "Invitees Updated Successfully" });
+      return NextResponse.json({
+        status: true,
+        message: "Invitees Updated Successfully",
+      });
     }
 
     // normal field update
@@ -261,14 +332,22 @@ export async function POST(req: NextRequest) {
   if (method === "toggleLike") {
     const { albumId, email } = body;
     if (!albumId || !email)
-      return NextResponse.json({ status: false, message: "albumId and email required" });
+      return NextResponse.json({
+        status: false,
+        message: "albumId and email required",
+      });
 
     const album = await prisma.album.findUnique({ where: { id: albumId } });
-    if (!album) return NextResponse.json({ status: false, message: "Album not found" });
+    if (!album)
+      return NextResponse.json({ status: false, message: "Album not found" });
 
-    const likes: string[] = Array.isArray(album.likesByEmail) ? (album.likesByEmail as unknown as string[]) : [];
+    const likes: string[] = Array.isArray(album.likesByEmail)
+      ? (album.likesByEmail as unknown as string[])
+      : [];
     const hasLiked = likes.includes(email);
-    const updatedLikes = hasLiked ? likes.filter((e) => e !== email) : [...likes, email];
+    const updatedLikes = hasLiked
+      ? likes.filter((e) => e !== email)
+      : [...likes, email];
 
     await prisma.album.update({
       where: { id: albumId },
@@ -283,7 +362,10 @@ export async function POST(req: NextRequest) {
     });
   }
 
-  return NextResponse.json({ status: false, message: "Unknown method" }, { status: 400 });
+  return NextResponse.json(
+    { status: false, message: "Unknown method" },
+    { status: 400 },
+  );
 }
 
 // helper

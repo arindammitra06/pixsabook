@@ -56,7 +56,7 @@ export default function AlbumGallery(props) {
     setSelectedAlbum(album);
     setOpened(true);
   };
-  console.log("Albums in Home Page:", albums);
+  
   useEffect(() => {
     if (currentUser !== null && currentUser !== undefined) {
       getAlbums();
@@ -102,7 +102,7 @@ export default function AlbumGallery(props) {
       }),
     ).then((res: any) => {
       dispatch(fetchUserById({ id: currentUser!.id! })).then((res: any) => {
-        console.log(res);
+        
         nprogress.complete();
       });
       if (res.payload.status) {
@@ -238,8 +238,7 @@ export default function AlbumGallery(props) {
                             onClick={(e) => {
                               e.stopPropagation();
                               openPublishModal(album.id!, "active", "No");
-                            }}
-                          >
+                            }}>
                             {t("delete")}
                           </Menu.Item>
                         </Menu.Dropdown>

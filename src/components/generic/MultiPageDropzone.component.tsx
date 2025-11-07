@@ -105,12 +105,11 @@ export default function MultiImageDropzone({
         multiple
         radius="md"
         style={{
-          border: "2px dashed var(--mantine-color-gray-4)",
+          border: "2px dashed var(--mantine-color-gray-7)",
           height: rem(150),
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          backgroundColor: "#fafafa",
         }}
       >
         <Stack align="center" gap="xs" style={{ pointerEvents: "none" }}>

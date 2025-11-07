@@ -42,7 +42,7 @@ export const uploadImageToImageKit = createAsyncThunk<
     const formData = new FormData();
     formData.append("file", file);
 
-    const response = await axios.post(baseUrl + "master/uploadImageToImageKit", formData, {
+    const response = await axios.post(baseUrl + "master", formData, {
       onUploadProgress: (event) => {
         const progress = Math.round((event.loaded * 100) / (event.total || 1));
         dispatch(setUploads([{ name: file.name, progress }]));
@@ -52,6 +52,7 @@ export const uploadImageToImageKit = createAsyncThunk<
     if (response.data?.status && response.data?.url) {
       dispatch(setUploads([{ name: file.name, progress: 100, url: response.data.url }]));
       return {
+        status:response.data?.status ,
         url: response.data.url,
         thumbnailUrl: response.data.thumbnailUrl,
         fileType: response.data.fileType,
@@ -82,7 +83,7 @@ export const uploadImagesSequentially = createAsyncThunk<
       const formData = new FormData();
       formData.append("file", file);
 
-      const response = await axios.post(baseUrl + "master/uploadImageToImageKit", formData, {
+      const response = await axios.post(baseUrl + "master", formData, {
         onUploadProgress: (event) => {
           const progress = Math.round((event.loaded * 100) / (event.total || 1));
           uploads = uploads.map((u) => (u.name === file.name ? { ...u, progress } : u));

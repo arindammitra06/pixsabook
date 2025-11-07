@@ -88,7 +88,6 @@ export const resetMyPassword = createAsyncThunk(
 export const setCurrentUser = createAsyncThunk(
   "auth/setCurrentUser",
   async ({ user, isLoggedIn }: { user: any; isLoggedIn: boolean }) => {
-    console.log(user, isLoggedIn);
     return { user: user, isLoggedIn: isLoggedIn };
   },
 );
@@ -107,7 +106,6 @@ const authSlice = createSlice({
         state.error = null;
       })
       .addCase(updateUserByField.fulfilled, (state, action) => {
-        console.log(action);
         state.isLoading = false;
         state.currentUser = action.payload.data.updatedUser;
       })
@@ -132,7 +130,6 @@ const authSlice = createSlice({
       })
       .addCase(setCurrentUser.fulfilled, (state, action) => {
         state.isLoading = false;
-        console.log(action.payload);
         state.currentUser = action.payload.user;
         state.loggedIn = action.payload.isLoggedIn;
       })

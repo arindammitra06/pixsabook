@@ -1,5 +1,5 @@
 import { FC, useMemo } from "react";
-import { IconLogout } from "@tabler/icons-react";
+import { IconPower } from "@tabler/icons-react";
 import classes from "./NavbarSimple.module.css";
 import { useRouter, usePathname } from "next/navigation";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
@@ -81,7 +81,7 @@ export const NavbarSimple: FC<NavbarSimpleProps> = ({ opened, toggle }) => {
 
       <div className={classes.footer}>
         <a href="#" className={classes.link} onClick={openLogoutModal}>
-          <IconLogout className={classes.linkIcon} stroke={1.5} />
+          <IconPower color='red' className={classes.linkIcon} stroke={2.5} />
           <span>{t("logout")}</span>
         </a>
       </div>
