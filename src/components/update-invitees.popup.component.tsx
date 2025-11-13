@@ -4,54 +4,37 @@ import {
   Modal,
   Flex,
   NavLink,
-  Input,
   Space,
-  Textarea,
-  Table,
-  ActionIcon,
-  NumberInput,
-  TextInput,
-  useMantineTheme,
   Box,
   LoadingOverlay,
+  useMantineTheme,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
-import {
-  IconAppWindow,
-  IconDeviceFloppy,
-  IconPercentage,
-  IconPlus,
-  IconSchool,
-  IconTrashFilled,
-  IconX,
-} from "@tabler/icons-react";
-import { useState, forwardRef, useImperativeHandle, useEffect } from "react";
+import { IconAppWindow, IconDeviceFloppy, IconX } from "@tabler/icons-react";
+import { forwardRef, useImperativeHandle, useEffect, useState } from "react";
 import { useDisclosure } from "@mantine/hooks";
 import { nprogress } from "@mantine/nprogress";
 import { t } from "i18next";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { errorAlert, successAlert } from "@/utils/alert.util";
 import { buildAnAlert, AlertType } from "@/utils/message.util";
-import { removeItem } from "framer-motion";
-import { MySelectItem } from "./generic/app-select.componnent";
-import {
-  CanShowConfirmModal,
-  ConfirmDialogProps,
-} from "./generic/confirmation.component";
 import { MultiEmailInput } from "./generic/MultiEmailInput.component";
 import { updateAlbumByField } from "@/store/slices/album.slice";
+import { CanShowConfirmModal, ConfirmDialogProps } from "./generic/confirmation.component";
 
 const UpdateInviteesModalComponent = forwardRef<
   CanShowConfirmModal,
-  ConfirmDialogProps
+  ConfirmDialogProps & { opened?: boolean; onClose?: () => void }
 >((props, ref) => {
   const dispatch = useAppDispatch();
   const theme = useMantineTheme();
-  const [opened, { open, close }] = useDisclosure(false);
-  const { header, message, onYesClick, onNoClick, formProps } = props;
-  const [visible, { toggle }] = useDisclosure(false);
-
+  const [internalOpened, { open, close }] = useDisclosure(false);
+  const { header, onYesClick, onNoClick, formProps, opened, onClose } = props;
+  const [visible, setVisible] = useState(false);
   const currentUser = useAppSelector((state) => state.auth.currentUser);
+
+  const modalOpened = opened ?? internalOpened;
+  const modalClose = onClose ?? close;
 
   useImperativeHandle(ref, () => ({
     openConfirmPopup() {
@@ -59,63 +42,60 @@ const UpdateInviteesModalComponent = forwardRef<
     },
   }));
 
-  const clickNoHandler = () => {
-    onNoClick();
-    close();
-  };
-
-  const clickYesHandler = () => {
-    onYesClick();
-    close();
-  };
-
   const form = useForm({
     initialValues: {
-      albumId:
-        formProps.albumId !== null && formProps.albumId !== undefined
-          ? formProps.albumId
-          : 0,
-      inviteeList:
-        formProps.inviteeList !== null && formProps.inviteeList !== undefined
-          ? formProps.inviteeList
-          : [],
+      albumId: formProps.albumId ?? 0,
+      inviteeList: formProps.inviteeList ?? [],
     },
     validate: {
-      albumId: (value) =>
-        value === null || value === undefined || value === 0
-          ? "Album details not found"
-          : null,
+      albumId: (value) => (!value ? "Album details not found" : null),
       inviteeList: (value) =>
-        value === null || value === undefined || value.length === 0
+        !value || value.length === 0
           ? t("please-add-at-least-one-invitee")
           : null,
     },
   });
 
-  const update = (event: any) => {
-    event.preventDefault();
+  useEffect(() => {
+    form.setValues({
+      albumId: formProps.albumId ?? 0,
+      inviteeList: formProps.inviteeList ?? [],
+    });
+  }, [formProps]);
 
-    if (!form.values.albumId || form.values.albumId === 0) {
+  const clickNoHandler = () => {
+    onNoClick?.();
+    modalClose();
+  };
+
+  const clickYesHandler = () => {
+    onYesClick?.();
+    modalClose();
+  };
+
+  const update = (e: any) => {
+    e.preventDefault();
+    if (!form.values.albumId) {
       errorAlert(t("album-details-not-found"));
       return;
     }
-    if (!form.values.inviteeList || form.values.inviteeList.length === 0) {
+    if (!form.values.inviteeList?.length) {
       errorAlert(t("please-add-at-least-one-invitee"));
       return;
     }
     nprogress.reset();
     nprogress.start();
-    toggle();
+    setVisible(true);
     dispatch(
       updateAlbumByField({
         albumId: form.values.albumId,
         fieldname: "viewers",
         fieldValue: form.values.inviteeList,
         currentUserId: currentUser!.id!,
-      }),
+      })
     ).then((res: any) => {
       nprogress.complete();
-      toggle();
+      setVisible(false);
       if (res.payload.status) {
         successAlert(res.payload.message);
         clickYesHandler();
@@ -127,13 +107,13 @@ const UpdateInviteesModalComponent = forwardRef<
 
   return (
     <Modal.Root
-      opened={opened}
-      onClose={close}
+      opened={modalOpened}
+      onClose={modalClose}
       onClick={(e) => e.stopPropagation()}
       size="75%"
       centered
       closeOnClickOutside={false}
-      closeOnEscape={false}
+      closeOnEscape={true}
     >
       <Modal.Overlay />
       <Modal.Content>
@@ -157,9 +137,9 @@ const UpdateInviteesModalComponent = forwardRef<
             {buildAnAlert(
               t("update-invitees-header"),
               t("update-invitees-desc"),
-              AlertType.WARN,
+              AlertType.WARN
             )}
-            <SimpleGrid cols={1} spacing="xs" verticalSpacing="0" mt={5}>
+            <SimpleGrid cols={1} spacing="xs" mt={5}>
               <MultiEmailInput
                 error={form.errors["inviteeList"]}
                 emailList={form.values.inviteeList}
@@ -169,14 +149,7 @@ const UpdateInviteesModalComponent = forwardRef<
           </Box>
 
           <Space h={20} />
-          <Flex
-            gap={6}
-            justify="flex-end"
-            align="center"
-            direction="row"
-            wrap="wrap"
-            style={{ margin: "5px" }}
-          >
+          <Flex gap={6} justify="flex-end" align="center" wrap="wrap" m="5px">
             <Button
               variant="light"
               color="red"
@@ -191,7 +164,7 @@ const UpdateInviteesModalComponent = forwardRef<
               color="green"
               disabled={visible}
               loading={visible}
-              onClick={(event) => update(event)}
+              onClick={update}
               rightSection={<IconDeviceFloppy size="1rem" />}
               size="xs"
             >

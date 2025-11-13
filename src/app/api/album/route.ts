@@ -32,6 +32,7 @@ export async function GET(req: NextRequest) {
 
     const album = await prisma.album.findFirst({
       where: { id: Number(id), active: BooleanFlag.Yes },
+      include: { createdBy: true, client: true, viewers: true },
     });
 
     return NextResponse.json(album);
@@ -90,7 +91,7 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   const body = (await req.json()) as any;
   const method = body.method;
-
+  console.log(body);
   if (!method)
     return NextResponse.json({ error: "Missing method" }, { status: 400 });
 
@@ -129,7 +130,7 @@ export async function POST(req: NextRequest) {
         }
       }
 
-      if (body.id > 0) {
+      if (Number(body.form.id) > 0) {
         await prisma.album.update({
           where: { id: body.form.id },
           data: {
@@ -291,7 +292,7 @@ export async function POST(req: NextRequest) {
       if (
         albumFetched !== null &&
         albumFetched !== undefined &&
-        albumFetched.isPublished.toString() === 'Yes'
+        albumFetched.isPublished.toString() === "Yes"
       ) {
         // send email
         await sendPublishEmail({

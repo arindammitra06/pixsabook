@@ -30,7 +30,6 @@ import LikeButton from "./AlbumLikeButton";
 import { t } from "i18next";
 import { Album } from "@/model/album.model";
 import UpdateInviteesModalComponent from "../update-invitees.popup.component";
-import { CanShowConfirmModal } from "./confirmation.component";
 import { successAlert, errorAlert } from "@/utils/alert.util";
 import { nprogress } from "@mantine/nprogress";
 import CornerRibbon from "./CornerRibbon";
@@ -38,35 +37,39 @@ import { isWithinLast7Days } from "@/utils/utils";
 import EmptyState from "./empty-state.component";
 import { modals } from "@mantine/modals";
 import { fetchUserById } from "@/store/slices/authenticate.slice";
+import { useRouter } from "next/navigation";
 
 export default function AlbumGallery(props) {
   const currentUser = useAppSelector((state) => state.auth.currentUser);
   const { isLoading, albums } = useAppSelector((state) => state.album);
   const dispatch = useAppDispatch();
+ const router = useRouter();
   const [opened, setOpened] = useState(false);
   const [selectedAlbum, setSelectedAlbum] = useState<any | null>(null);
-  const editInvitees = useRef<CanShowConfirmModal>(null);
-  function editInviteesOnButtonClick(event) {
-    event.stopPropagation();
-    if (editInvitees.current !== null && editInvitees.current !== undefined) {
-      editInvitees.current.openConfirmPopup();
-    }
-  }
-  const openAlbum = (album: any) => {
-    setSelectedAlbum(album);
-    setOpened(true);
-  };
-  
-  useEffect(() => {
-    if (currentUser !== null && currentUser !== undefined) {
-      getAlbums();
-    }
-  }, [currentUser, dispatch]);
+  const [inviteeModalOpened, setInviteeModalOpened] = useState(false);
+  const [inviteeAlbum, setInviteeAlbum] = useState<any | null>(null);
 
   const getAlbums = () => {
     dispatch(
       getAlbumsByUserId({ userId: currentUser!.id!, pageType: props.pageType }),
     );
+  };
+
+  useEffect(() => {
+    if (currentUser) {
+      getAlbums();
+    }
+  }, [currentUser, dispatch]);
+
+  const openAlbum = (album: any) => {
+    setSelectedAlbum(album);
+    setOpened(true);
+  };
+
+  const openInviteeModal = (album: any, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setInviteeAlbum(album);
+    setInviteeModalOpened(true);
   };
 
   const openPublishModal = (
@@ -84,25 +87,26 @@ export default function AlbumGallery(props) {
       onConfirm: () => publishOrDeleteAlbum(id, fieldName, fieldValue),
     });
 
+  function onEditClick(album) {
+    router.push(`/home/create?albumId=${album.id}`);
+  }
+
   const publishOrDeleteAlbum = (
     albumId: number,
     fieldName: string,
     action: string,
   ) => {
-    // Dispatch updateAlbumByField action to publish the album
-    // You may need to pass currentUserId as well
     nprogress.reset();
     nprogress.start();
     dispatch(
       updateAlbumByField({
-        albumId: albumId,
+        albumId,
         fieldname: fieldName,
         fieldValue: action,
         currentUserId: currentUser!.id!,
       }),
     ).then((res: any) => {
-      dispatch(fetchUserById({ id: currentUser!.id! })).then((res: any) => {
-        
+      dispatch(fetchUserById({ id: currentUser!.id! })).then(() => {
         nprogress.complete();
       });
       if (res.payload.status) {
@@ -128,7 +132,7 @@ export default function AlbumGallery(props) {
             </Card>
           ))}
         </SimpleGrid>
-      ) : albums !== null && albums !== undefined && albums.length > 0 ? (
+      ) : albums && albums.length > 0 ? (
         <SimpleGrid cols={{ base: 1, xs: 2, sm: 3, md: 3, lg: 3 }} spacing="xs">
           {albums.map((album: Album) => (
             <Card
@@ -140,42 +144,25 @@ export default function AlbumGallery(props) {
               style={{ overflow: "hidden" }}
             >
               <Card.Section>
-                <UpdateInviteesModalComponent
-                  ref={editInvitees}
-                  header={t("update-invitation-list")}
-                  message={""}
-                  onNoClick={() => {}}
-                  onYesClick={() => getAlbums()}
-                  formProps={{
-                    albumId: album.id,
-                    inviteeList: album.viewers
-                      ? album.viewers.map((user) => user.email)
-                      : [],
-                  }}
-                />
                 <Box pos="relative">
                   {album.active.toString() === "No" ? (
                     <CornerRibbon
-                      position="top-left" // OPTIONAL, default as "top-right"
-                      fontColor="red" // OPTIONAL, default as "#f0f0f0"
-                      backgroundColor="yellow" // OPTIONAL, default as "#2c7"
-                      containerStyle={{}} // OPTIONAL, style of the ribbon
-                      style={{ fontWeight: 900, fontSize: "9px" }} // OPTIONAL, style of ribbon content
-                      className="" // OPTIONAL, css class of ribbon
+                      position="top-left"
+                      fontColor="red"
+                      backgroundColor="yellow"
+                      style={{ fontWeight: 900, fontSize: "9px" }}
                     >
-                      DELETED
+                      {t("deleted")}
                     </CornerRibbon>
                   ) : (
                     isWithinLast7Days(album.createdAt) && (
                       <CornerRibbon
-                        position="top-left" // OPTIONAL, default as "top-right"
-                        fontColor="#f0f0f0" // OPTIONAL, default as "#f0f0f0"
-                        backgroundColor="red" // OPTIONAL, default as "#2c7"
-                        containerStyle={{}} // OPTIONAL, style of the ribbon
-                        style={{ fontWeight: 900, fontSize: "9px" }} // OPTIONAL, style of ribbon content
-                        className="" // OPTIONAL, css class of ribbon
+                        position="top-left"
+                        fontColor="#f0f0f0"
+                        backgroundColor="red"
+                        style={{ fontWeight: 900, fontSize: "9px" }}
                       >
-                        NEW
+                        {t("new")}
                       </CornerRibbon>
                     )
                   )}
@@ -187,9 +174,7 @@ export default function AlbumGallery(props) {
                     fit="cover"
                   />
 
-                  {/* Overlay icon */}
-                  {currentUser !== null &&
-                    currentUser !== undefined &&
+                  {currentUser &&
                     (currentUser.userType.toString() === "Admin" ||
                       currentUser.userType.toString() === "Editor") &&
                     album.active.toString() === "Yes" && (
@@ -229,16 +214,25 @@ export default function AlbumGallery(props) {
                               ? t("publish")
                               : t("unpublish")}
                           </Menu.Item>
-                          <Menu.Item leftSection={<IconEdit size={14} />}>
+
+                          <Menu.Item 
+                          onClick={(e) => {
+                              e.stopPropagation();
+                              onEditClick(album);
+                            }}
+                          leftSection={<IconEdit size={14} />}>
                             {t("edit")}
                           </Menu.Item>
+
+
                           <Menu.Item
                             color="red"
                             leftSection={<IconTrash size={14} />}
                             onClick={(e) => {
                               e.stopPropagation();
                               openPublishModal(album.id!, "active", "No");
-                            }}>
+                            }}
+                          >
                             {t("delete")}
                           </Menu.Item>
                         </Menu.Dropdown>
@@ -270,14 +264,14 @@ export default function AlbumGallery(props) {
                     variant="light"
                     color="gray"
                     radius="xl"
-                    onClick={(e) => editInviteesOnButtonClick(e)}
+                    onClick={(e) => openInviteeModal(album, e)}
                   >
                     <IconUsersPlus size={18} color="teal" />
                   </ActionIcon>
                 </Group>
                 <TimeAgo
                   date={new Date(album.createdAt)}
-                  render={({ error, value }) => (
+                  render={({ value }) => (
                     <Text size="xs" c="dimmed">
                       {value}
                     </Text>
@@ -291,6 +285,26 @@ export default function AlbumGallery(props) {
         <Center>
           <EmptyState title={t("no_albums")} message={t("no_albums_sub")} />
         </Center>
+      )}
+
+      {inviteeAlbum && (
+        <UpdateInviteesModalComponent
+          header={t("update-invitation-list")}
+          message=""
+          onNoClick={() => setInviteeModalOpened(false)}
+          onYesClick={() => {
+            setInviteeModalOpened(false);
+            getAlbums();
+          }}
+          formProps={{
+            albumId: inviteeAlbum.id,
+            inviteeList: inviteeAlbum.viewers
+              ? inviteeAlbum.viewers.map((u) => u.email)
+              : [],
+          }}
+          opened={inviteeModalOpened}
+          onClose={() => setInviteeModalOpened(false)}
+        />
       )}
 
       {selectedAlbum && (

@@ -11,6 +11,7 @@ export function ThemeButton() {
       variant="default"
       size="lg"
       radius="xl"
+      mx="xs"
       aria-label="Toggle color scheme"
     >
       {colorScheme === 'light' ? (

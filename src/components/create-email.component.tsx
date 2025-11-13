@@ -38,6 +38,7 @@ export default function CreateEmails(form: any) {
               withAsterisk
               size="sm"
               radius="md"
+              readOnly
               error={form.data.errors["creatorEmail"]}
               leftSection={<IconShield size="1.0rem" />}
               placeholder={t("please-enter-field", { field: t("creater-email") })}

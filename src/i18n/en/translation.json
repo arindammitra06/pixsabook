@@ -156,6 +156,8 @@
     "add-profile-pic": "Add Profile Photo",
     "light": "Light",   
     "dark": "Dark",
+    "deleted":"DELETED",
+    "new":"NEW",
     "image-quality": "Image Quality",
     "high-quality": "High Quality",
     "medium-quality": "Medium Quality",

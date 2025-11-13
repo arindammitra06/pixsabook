@@ -52,7 +52,7 @@ export default function LoginPage() {
   const [otp, setOtp] = useState(null);
   const [otpError, setOtpError] = useState(false);
   const [userFound, setUserFound] = useState(null);
-  console.log(otp)
+  console.log(otp);
   const goToPage = (url: string) => {
     router.push(url);
   };
@@ -91,7 +91,7 @@ export default function LoginPage() {
     setIsLoggingIn(true);
 
     dispatch(getOTP({ email: form.values.email })).then((res: any) => {
-      console.log(res)
+      console.log(res);
       setIsLoggingIn(false);
       nprogress.complete();
       if (res.payload.status) {
@@ -125,7 +125,6 @@ export default function LoginPage() {
     setOtp(null);
     setOtpError(false);
     setIsPageLoading(false);
-    
   }, [currentUser]);
 
   const largeScreen = useMediaQuery("(min-width: 40em)");
@@ -145,26 +144,42 @@ export default function LoginPage() {
                 style={{
                   minHeight: "95vh",
                   maxWidth: rem(500),
-                  paddingTop: rem(150),
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+
+                  // 👇 frosted glass + transparency
+                  background:
+                    colorScheme === "dark"
+                      ? "rgba(0, 0, 0, 0.05)" // translucent dark in dark mode
+                      : "rgba(255, 255, 255, 0.05)", // translucent white in light mode
+
+                  backdropFilter: "blur(5px)",
+                  WebkitBackdropFilter: "blur(12px)",
+                  border:
+                    colorScheme === "dark"
+                      ? "1px solid rgba(255, 255, 255, 0.1)"
+                      : "1px solid rgba(0, 0, 0, 0.1)",
+                  boxShadow:
+                    colorScheme === "dark"
+                      ? "0 8px 32px rgba(0, 0, 0, 0.5)"
+                      : "0 8px 32px rgba(0, 0, 0, 0.1)",
+
+                  // keep your existing responsive constraints
                   [`@media (maxWidth: ${theme.breakpoints.xs})`]: {
                     maxWidth: "100%",
                   },
                 }}
                 radius={0}
-                p={30}
+                px={30}
+                py={20}
               >
-                <div
-                  style={{
-                    minHeight: "92vh",
-                    backgroundSize: "cover",
-                    backgroundImage: `url('/assets/images/login_single_bg.webp')`,
-                  }}
-                >
+                <div style={{ width: "100%" }}>
                   <Text
                     mt="sm"
                     ta="center"
                     c={theme.primaryColor}
-                    style={{ fontFamily: "SandorTrial" }}
+                    style={{ fontFamily: "SandorTrial", letterSpacing: 1.3 }}
                     size="28px"
                     fw={600}
                     mb={20}
@@ -179,7 +194,7 @@ export default function LoginPage() {
                       />
                     </Center>
                   </Text>
-                  <Space h="lg" />
+
                   <form onSubmit={handleSubmit}>
                     <FocusTrap active={true}>
                       <TextInput
@@ -193,7 +208,7 @@ export default function LoginPage() {
                           otp !== null && otp !== undefined ? true : false
                         }
                         label={
-                          <Text size="sm" fw={500}>
+                          <Text size="sm" fw={500} c={ "white"}>
                             {t("please-enter-email-for-OTP")}
                           </Text>
                         }
@@ -223,11 +238,7 @@ export default function LoginPage() {
                               otp != null && otp !== undefined ? true : false
                             }
                             onComplete={(value) => {
-                              if (
-                                value !== null &&
-                                value !== undefined &&
-                                value.length === 6
-                              ) {
+                              if (value && value.length === 6) {
                                 if (value === otp) {
                                   successAlert("OTP verified successfully");
                                   dispatch(
@@ -263,8 +274,9 @@ export default function LoginPage() {
                         </Center>
                       )}
                     </FocusTrap>
+
                     <Checkbox
-                      label={t("please-accept-terms")}
+                      label={<Text fz="sm" c={ "white"} >{t("please-accept-terms")}</Text>}
                       style={{ marginTop: "10px" }}
                       checked={form.values.terms}
                       onChange={(event) =>

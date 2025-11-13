@@ -1,11 +1,11 @@
-import React, { FC, useState, KeyboardEvent } from "react";
-import { TextInput, Pill, Group,Text,useMantineTheme } from "@mantine/core";
+import React, { FC, useState, KeyboardEvent, useEffect } from "react";
+import { TextInput, Pill, Group, Text, useMantineTheme } from "@mantine/core";
 import { t } from "i18next";
 
 export interface MultiEmailInputProps {
   /** The current list of emails */
   emailList: string[];
-  error:any;
+  error: any;
 
   /** Callback when the email list changes */
   onChange?: (emails: string[]) => void;
@@ -18,7 +18,7 @@ export interface MultiEmailInputProps {
 }
 
 export const MultiEmailInput: FC<MultiEmailInputProps> = ({
-  emailList,
+  emailList = [],
   onChange,
   error,
   label = "Invite people by email",
@@ -26,7 +26,7 @@ export const MultiEmailInput: FC<MultiEmailInputProps> = ({
 }) => {
   const [inputValue, setInputValue] = useState("");
   const theme = useMantineTheme();
-   
+  
   const isValidEmail = (email: string) =>
     /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
 
@@ -62,7 +62,11 @@ export const MultiEmailInput: FC<MultiEmailInputProps> = ({
         size="sm"
         radius="md"
         error={error}
-        label={<Text  fw={600} c={theme.primaryColor}>{t("invitees")}</Text>}
+        label={
+          <Text fw={600} c={theme.primaryColor}>
+            {t("invitees")}
+          </Text>
+        }
         placeholder={placeholder}
         value={inputValue}
         onChange={(e) => setInputValue(e.currentTarget.value)}

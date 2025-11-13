@@ -31,7 +31,6 @@ export default function ProviderLayout({
   const router = useRouter();
   const dispatch = useAppDispatch();
 
-  console.log(defaultLight.colorScheme);
   useEffect(() => {
     i18next.changeLanguage(language);
   }, [language, currentUser, router, dispatch]);

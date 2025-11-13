@@ -1,17 +1,28 @@
-'use client';
+"use client";
 
-import { Container, Group, Text, Anchor, Divider, Image, Stack, rem } from '@mantine/core';
-import { IconBrandFacebook, IconBrandInstagram } from '@tabler/icons-react';
+import {
+  Container,
+  Group,
+  Text,
+  Anchor,
+  Divider,
+  Image,
+  Stack,
+  rem,
+} from "@mantine/core";
+import { IconBrandFacebook, IconBrandInstagram } from "@tabler/icons-react";
 
 export default function Footer() {
   return (
     <footer
       style={{
-        backgroundColor: '#0a0a0c', // dark teal-like tone
-        color: 'white',
+        backdropFilter: "blur(5px)", // subtle blur for background
+        WebkitBackdropFilter: "blur(12px)", // Safari support
+        border: "1px solid rgba(255, 255, 255, 0.05)",
+
         paddingTop: rem(32),
         paddingBottom: rem(32),
-        borderTop: '0.5px solid #383c3f'
+        borderTop: "0.5px solid #383c3f",
       }}
     >
       <Container size="lg">
@@ -22,13 +33,18 @@ export default function Footer() {
           </Text>
 
           <Text c="gray.3" fz="sm" maw={900}>
-            Pixsabook is a cloud album to preserve your favorite moments lifelong and share the same with
-            friends and family in a perfect elegant way as traditional Album Books. For more questions,
-            queries and suggestions, please reach our to us at{' '}
-            <Anchor href="mailto:pixsabooksys@gmail.com" c="blue.4" underline="hover">
+            Pixsabook is a cloud album to preserve your favorite moments
+            lifelong and share the same with friends and family in a perfect
+            elegant way as traditional Album Books. For more questions, queries
+            and suggestions, please reach our to us at{" "}
+            <Anchor
+              href="mailto:pixsabooksys@gmail.com"
+              c="blue.4"
+              underline="hover"
+            >
               pixsabooksys@gmail.com
-            </Anchor>{' '}
-            or{' '}
+            </Anchor>{" "}
+            or{" "}
             <Anchor
               href="https://www.facebook.com/tamajitphotography"
               c="blue.4"
@@ -37,29 +53,35 @@ export default function Footer() {
             >
               Tamajit Photography on Facebook
             </Anchor>
-            . Also let us know if you want to collaborate and contribute in any way.
+            . Also let us know if you want to collaborate and contribute in any
+            way.
           </Text>
         </Stack>
 
         <Divider my="md" color="#383c3f" />
-        
-            
+
         {/* Bottom section */}
         <Group justify="space-between" wrap="wrap" align="center">
           {/* Left side */}
-          <Image src="/assets/images/logo_text.png" alt="pixsabook logo" h={50} fit="contain" />
+          <Image
+            src="/assets/images/logo_text.png"
+            alt="pixsabook logo"
+            h={80}
+            w={100}
+            fit="contain"
+          />
           <Group align="center" gap="sm">
             <Group gap="lg" visibleFrom="sm">
-              <Anchor href="#" c="white" fz="sm" underline="hover">
+              <Anchor href="#"  fz="sm" underline="hover">
                 Help & Support
               </Anchor>
-              <Anchor href="#" c="white" fz="sm" underline="hover">
+              <Anchor href="#"  fz="sm" underline="hover">
                 Terms & Conditions
               </Anchor>
-              <Anchor href="#" c="white" fz="sm" underline="hover">
+              <Anchor href="#"  fz="sm" underline="hover">
                 Privacy Policy
               </Anchor>
-              <Anchor href="#" c="white" fz="sm" underline="hover">
+              <Anchor href="#"  fz="sm" underline="hover">
                 Contact Us
               </Anchor>
             </Group>
@@ -67,11 +89,17 @@ export default function Footer() {
 
           {/* Right side */}
           <Group gap="md">
-            <Anchor href="https://www.facebook.com/tamajitphotography" target="_blank" c="white">
-              <IconBrandFacebook size={22} />
+            <Anchor
+              href="https://www.facebook.com/tamajitphotography"
+              target="_blank"
+            >
+              <IconBrandFacebook size={22} color="blue"/>
             </Anchor>
-            <Anchor href="https://www.facebook.com/tamajitphotography" target="_blank" c="white">
-              <IconBrandInstagram size={22} color="#F56040" />
+            <Anchor
+              href="https://www.facebook.com/tamajitphotography"
+              target="_blank"
+            >
+              <IconBrandInstagram size={22} color="red" />
             </Anchor>
           </Group>
         </Group>
