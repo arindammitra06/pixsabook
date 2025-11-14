@@ -66,6 +66,7 @@
     "client-email-desc":"Client email will be able to administer this album",
     "please-add-at-least-one-invitee":"Please add at least one invitee",
     "please-check-invalid-email-invitee": "Please check invalid email(s) in invitee list",
+    "creator-cannot-be-same-as-client": "Creator email cannot be same as Client email",
     "creator-email-should-not-be-in-invitee-list":"Creator email should not be in invitee list",
     "client-email-should-not-be-in-invitee-list":"Client email should not be in invitee list",
     "please-enter-valid-client-email":"Please enter valid client email",

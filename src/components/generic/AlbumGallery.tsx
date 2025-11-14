@@ -260,7 +260,9 @@ export default function AlbumGallery(props) {
                 <Group gap="xs">
                   <LikeButton albumId={album.id} />
 
-                  <ActionIcon
+                 {(currentUser!.id! === album.clientId )
+                 || (currentUser?.userType.toString()==='Admin' || currentUser?.userType.toString()==='Editor')
+                    && <ActionIcon
                     variant="light"
                     color="gray"
                     radius="xl"
@@ -268,6 +270,8 @@ export default function AlbumGallery(props) {
                   >
                     <IconUsersPlus size={18} color="teal" />
                   </ActionIcon>
+                  }
+                  
                 </Group>
                 <TimeAgo
                   date={new Date(album.createdAt)}

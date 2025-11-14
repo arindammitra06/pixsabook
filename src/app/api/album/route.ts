@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { BooleanFlag } from "@prisma/client";
+import { BooleanFlag, Role } from "@prisma/client";
 import { sendPublishEmail } from "@/utils/emailutil";
 import { transformValueTypes } from "framer-motion";
 
@@ -64,24 +64,55 @@ export async function GET(req: NextRequest) {
         })),
       );
     } else {
-      const albums = await prisma.album.findMany({
+      //Homepage
+      const user = await prisma.user.findUnique({
         where: {
-          active: BooleanFlag.Yes,
-          OR: [
-            { createdById: uid },
-            { clientId: uid },
-            { viewers: { some: { id: uid } } },
-          ],
+          id: uid,
         },
-        include: { createdBy: true, client: true, viewers: true },
+        select: { userType: true },
       });
 
-      return NextResponse.json(
-        albums.map((a) => ({
-          ...a,
-          likesByEmail: Array.isArray(a.likesByEmail) ? a.likesByEmail : [],
-        })),
-      );
+      if (user?.userType === Role.Viewer) {
+        const albums = await prisma.album.findMany({
+          where: {
+            active: BooleanFlag.Yes,
+            isPublished: BooleanFlag.Yes,
+            OR: [
+              { createdById: uid },
+              { clientId: uid },
+              { viewers: { some: { id: uid } } },
+            ],
+          },
+          include: { createdBy: true, client: true, viewers: true },
+        });
+
+        return NextResponse.json(
+          albums.map((a) => ({
+            ...a,
+            likesByEmail: Array.isArray(a.likesByEmail) ? a.likesByEmail : [],
+          })),
+        );
+      } else {
+        const albums = await prisma.album.findMany({
+          where: {
+            active: BooleanFlag.Yes,
+            // isPublished : BooleanFlag.Yes,
+            OR: [
+              { createdById: uid },
+              { clientId: uid },
+              { viewers: { some: { id: uid } } },
+            ],
+          },
+          include: { createdBy: true, client: true, viewers: true },
+        });
+
+        return NextResponse.json(
+          albums.map((a) => ({
+            ...a,
+            likesByEmail: Array.isArray(a.likesByEmail) ? a.likesByEmail : [],
+          })),
+        );
+      }
     }
   }
 

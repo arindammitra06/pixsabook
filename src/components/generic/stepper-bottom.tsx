@@ -101,6 +101,15 @@ export default function StepperBottom(form: any) {
         );
         return;
       } else if (
+        form.data.values.creatorEmail ===form.data.values.clientEmail )
+      {
+        form.data.setFieldError(
+          "clientEmail",
+          t("creator-cannot-be-same-as-client"),
+        );
+        return;
+      }
+       else if (
         form.data.values.creatorEmail &&
         form.data.values.inviteeList.includes(
           form.data.values.creatorEmail.toString(),
