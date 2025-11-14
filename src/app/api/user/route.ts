@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { BooleanFlag } from "@prisma/client";
+import { BooleanFlag, Role } from "@prisma/client";
 import { sendSubscriptionEmail } from "@/utils/emailutil";
 
 export async function GET(req: NextRequest) {
@@ -61,7 +61,10 @@ export async function POST(req: NextRequest) {
         }
 
         const users = await prisma.user.findMany({
-          where: { email: { contains: searchStr } },
+          where: {
+            email: { contains: searchStr },
+            OR: [{ userType: Role.Admin }, { userType: Role.Editor }],
+          },
           include: { UserSubscription: { include: { Plan: true } } },
           take: 5,
           orderBy: { name: "asc" },
@@ -71,6 +74,9 @@ export async function POST(req: NextRequest) {
       }
 
       case "updateUserByField": {
+        console.log(body);
+
+        
         const userData = body;
         if (!userData?.id || !userData?.fieldname) {
           return NextResponse.json({
@@ -147,11 +153,9 @@ export async function POST(req: NextRequest) {
                 planName: plan.name,
                 credits: existingSub.creditsLeft + plan.albumsCredit,
                 expiry: new Date(
-                    baseDate.getTime() + plan.validityDays * 86400000,
-                  ).toDateString(),
+                  baseDate.getTime() + plan.validityDays * 86400000,
+                ).toDateString(),
               });
-
-
             } else {
               await prisma.userSubscription.create({
                 data: {
@@ -171,7 +175,8 @@ export async function POST(req: NextRequest) {
                 planName: plan.name,
                 credits: plan.albumsCredit,
                 expiry: new Date(
-                    now.getTime() + plan.validityDays * 86400000,).toDateString(),
+                  now.getTime() + plan.validityDays * 86400000,
+                ).toDateString(),
               });
             }
 
@@ -216,13 +221,14 @@ export async function POST(req: NextRequest) {
         });
 
         //Send email
-              await sendSubscriptionEmail({
-                userEmail: createdUser.email!,
-                planName: plan.name,
-                credits: plan.albumsCredit,
-                expiry: new Date(
-                    now.getTime() + plan.validityDays * 86400000,).toDateString(),
-              });
+        await sendSubscriptionEmail({
+          userEmail: createdUser.email!,
+          planName: plan.name,
+          credits: plan.albumsCredit,
+          expiry: new Date(
+            now.getTime() + plan.validityDays * 86400000,
+          ).toDateString(),
+        });
         return NextResponse.json({
           status: true,
           message: "Editor Created Successfully",
