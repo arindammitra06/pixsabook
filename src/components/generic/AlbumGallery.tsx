@@ -260,8 +260,8 @@ export default function AlbumGallery(props) {
                 <Group gap="xs">
                   <LikeButton albumId={album.id} />
 
-                 {(currentUser!.id! === album.clientId )
-                 || (currentUser?.userType.toString()==='Admin' || currentUser?.userType.toString()==='Editor')
+                 {(currentUser!.id! === album.clientId 
+                 || currentUser?.userType.toString()==='Admin' || currentUser?.userType.toString()==='Editor')
                     && <ActionIcon
                     variant="light"
                     color="gray"

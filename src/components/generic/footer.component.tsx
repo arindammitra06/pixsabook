@@ -11,6 +11,8 @@ import {
   rem,
 } from "@mantine/core";
 import { IconBrandFacebook, IconBrandInstagram } from "@tabler/icons-react";
+import { t } from "i18next";
+
 
 export default function Footer() {
   return (
@@ -29,20 +31,17 @@ export default function Footer() {
         {/* Top description section */}
         <Stack gap="xs">
           <Text fw={600} fz="lg">
-            Pixsabook Cloud Album - Memories for lifetime
+            Pixsabook Cloud Album - {t('memories-for-lifetime')}
           </Text>
 
           <Text c="gray.3" fz="sm" maw={900}>
-            Pixsabook is a cloud album to preserve your favorite moments
-            lifelong and share the same with friends and family in a perfect
-            elegant way as traditional Album Books. For more questions, queries
-            and suggestions, please reach our to us at{" "}
+            {t('footer-lines')}{" "}
             <Anchor
-              href="mailto:pixsabooksys@gmail.com"
+              href={`mailto:${process.env.SUPPORT_MAIL}`}
               c="blue.4"
               underline="hover"
             >
-              pixsabooksys@gmail.com
+              {process.env.SUPPORT_MAIL}
             </Anchor>{" "}
             or{" "}
             <Anchor
@@ -53,8 +52,7 @@ export default function Footer() {
             >
               Tamajit Photography on Facebook
             </Anchor>
-            . Also let us know if you want to collaborate and contribute in any
-            way.
+            . {t('footer-lines-2')}.
           </Text>
         </Stack>
 
@@ -73,16 +71,13 @@ export default function Footer() {
           <Group align="center" gap="sm">
             <Group gap="lg" visibleFrom="sm">
               <Anchor href="#"  fz="sm" underline="hover">
-                Help & Support
+                {t('help')}
               </Anchor>
               <Anchor href="#"  fz="sm" underline="hover">
-                Terms & Conditions
+                {t('terms-conditions')}
               </Anchor>
               <Anchor href="#"  fz="sm" underline="hover">
-                Privacy Policy
-              </Anchor>
-              <Anchor href="#"  fz="sm" underline="hover">
-                Contact Us
+                {t('contact-us')}
               </Anchor>
             </Group>
           </Group>

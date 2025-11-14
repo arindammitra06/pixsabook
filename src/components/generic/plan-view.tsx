@@ -1,4 +1,9 @@
-import { IconAt, IconChecks, IconInfoCircle, IconPhoneCall } from "@tabler/icons-react";
+import {
+  IconAt,
+  IconChecks,
+  IconInfoCircle,
+  IconPhoneCall,
+} from "@tabler/icons-react";
 import {
   Stack,
   Box,
@@ -18,15 +23,16 @@ import { useAppDispatch } from "@/store/hooks";
 import { getSubscriptionPlans } from "@/store/slices/master.slice";
 import { useState, useEffect, Fragment } from "react";
 import { Dispatch } from "@reduxjs/toolkit";
+import { formatToDDMMYYYY } from "@/utils/utils";
 
 interface PlanViewProps {
   selectedPlan: number | null;
   setSelectedPlan: any;
   isNew: boolean;
   isReadonly: boolean;
-  currentPlanName?:string,
-  count?: number,
-  expiry?:any,
+  currentPlanName?: string;
+  count?: number;
+  expiry?: any;
 }
 
 export function PlanView({
@@ -36,13 +42,13 @@ export function PlanView({
   isReadonly,
   currentPlanName,
   expiry,
-  count
+  count,
 }: PlanViewProps) {
   const theme = useMantineTheme();
 
   const dispatch = useAppDispatch();
   const [plans, setPlans] = useState<any[]>([]);
-  
+
   useEffect(() => {
     dispatch(getSubscriptionPlans()).then((response: any) => {
       setPlans(response.payload);
@@ -61,18 +67,26 @@ export function PlanView({
       >
         {!isNew && (
           <Blockquote
-             radius="xl"
+            radius="xl"
             iconSize={30}
-            icon={<IconInfoCircle/>}
+            icon={<IconInfoCircle />}
             mt="xl"
           >
-            <Text size="md" fw={500}>{t('current_subscription_readonly',
-            {field:currentPlanName!==null && currentPlanName!==undefined? currentPlanName?.toUpperCase() : "No"})}</Text>
-             
-            <Text size="sm" fs="italic">{t('subscription_info', {
-              count: Number(count ?? 0),
-              date: expiry ?? '---',
-            })}</Text>
+            <Text size="md" fw={500}>
+              {t("current_subscription_readonly", {
+                field:
+                  currentPlanName !== null && currentPlanName !== undefined
+                    ? currentPlanName?.toUpperCase()
+                    : "No",
+              })}
+            </Text>
+
+            <Text size="sm" fs="italic">
+              {t("subscription_info", {
+                count: Number(count ?? 0),
+                date: formatToDDMMYYYY(expiry) ?? "---",
+              })}
+            </Text>
           </Blockquote>
         )}
 
@@ -155,13 +169,20 @@ export function PlanView({
                   </Card>
                 </Grid.Col>
               ))
-            : Array.from({ length: 2 }).map((_, index) => (
-                <Box key={index} mb={"xs"}>
-                  <Skeleton height={8} radius="xl" />
-                  <Skeleton height={8} mt={6} radius="xl" />
-                  <Skeleton height={8} mt={6} width="70%" radius="xl" />
-                  <Skeleton height={8} radius="xl" />
-                </Box>
+            : Array.from({ length: 4 }).map((_, i) => (
+                <Grid.Col key={i} span={{ base: 6, sm: 4, md: 3, lg: 3 }}>
+                  <Card mih={400} radius="md" shadow="sm" p="md">
+                    <Skeleton height={20} radius="md" />
+                    <Skeleton height={15} mt="sm" width="60%" radius="md" />
+                    <Skeleton height={10} mt="md" radius="xl" />
+                    <Skeleton height={10} mt={6} radius="xl" />
+                    <Skeleton height={10} mt={6} width="80%" radius="xl" />
+
+                    <Box style={{ flexGrow: 1 }} mt="md" />
+
+                    <Skeleton height={30} radius="sm" />
+                  </Card>
+                </Grid.Col>
               ))}
         </Grid>
       </Input.Wrapper>

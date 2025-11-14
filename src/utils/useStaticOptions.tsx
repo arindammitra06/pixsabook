@@ -340,13 +340,6 @@ export function useStaticOptions(): StaticOptions {
         { value: 'en', label: t('english') },
         { value: 'hi', label: t('hindi' )},
         { value: 'bn', label: t('bengali') },
-        { value: 'ta', label: t('tamil') },
-        { value: 'te', label: t('telugu' )},
-        { value: 'gu', label: t('gujarati') },
-        { value: 'mr', label: t('marathi') },
-        { value: 'ml', label: t('malayalam') },
-        { value: 'pa', label: t('punjabi') },
-        { value: 'ur', label: t('urdu') },
         
     ];
 

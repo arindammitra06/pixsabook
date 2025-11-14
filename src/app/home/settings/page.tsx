@@ -125,6 +125,7 @@ export default function SettingsPage() {
       }
     }
     setPhone(currentUser?.mobile || "");
+    setLocation(currentUser?.location || "");
     loadProfilePic();
   }, [currentUser?.mobile, currentUser?.thumbnailUrl]);
 
@@ -455,8 +456,7 @@ export default function SettingsPage() {
           )}
 
            {modalType === "location" && (
-            <CitySelect
-            />
+            <CitySelect location={location} setLocation={setLocation}/>
           )}
 
           {modalType === "profilePic" && (

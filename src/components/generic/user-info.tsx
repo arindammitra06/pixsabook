@@ -1,5 +1,5 @@
 import { IconAt, IconPhoneCall } from "@tabler/icons-react";
-import { Avatar, Paper, Group, Text, Box } from "@mantine/core";
+import { Avatar, Paper, Group, Text, Box, useMantineTheme } from "@mantine/core";
 import classes from "./user-info.module.css";
 import { t } from "i18next";
 import CornerRibbon from "./CornerRibbon";
@@ -9,6 +9,8 @@ interface UserInfoProps {
 }
 
 export function UserInfo({ user }: UserInfoProps) {
+   const theme = useMantineTheme();
+
   return (
     <Box pos="relative">
       {user.UserSubscription?.[0] && (
@@ -29,13 +31,13 @@ export function UserInfo({ user }: UserInfoProps) {
           user !== undefined &&
           user.thumbnailUrl !== null &&
           user.thumbnailUrl !== undefined ? (
-            <Avatar key={user!.email} src={user!.thumbnailUrl} />
+            <Avatar key={user!.email} src={user!.thumbnailUrl} size={'xl'}/>
           ) : (
-            <Avatar key={user!.email} name={user!.email} color="initials" />
+            <Avatar key={user!.email} name={user!.email} color="initials" size={'xl'} />
           )}
           <div>
-            <Text fz="xs" tt="uppercase" fw={700} c="dimmed">
-              {t("CREATOR")}
+            <Text fz="sm" tt="uppercase" fw={700} c="dimmed">
+              {user!.userType.toUpperCase()}
             </Text>
 
             <Text fz="lg" fw={500} className={classes.name}>

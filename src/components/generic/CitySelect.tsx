@@ -1,14 +1,26 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Combobox, useCombobox, Input } from "@mantine/core";
 import { INDIAN_CITIES } from "@/utils/indianCities";
 import { t } from "i18next";
 
-export function CitySelect() {
-  const combobox = useCombobox({  });
-  const [value, setValue] = useState("");
+export function CitySelect({
+  location,
+  setLocation,
+}: {
+  location: string;
+  setLocation: (value: string) => void;
+}) {
+  const combobox = useCombobox({});
   const [search, setSearch] = useState("");
+
+  // Populate search box when editing
+  useEffect(() => {
+    if (location) {
+      setSearch(location);
+    }
+  }, [location]);
 
   const filtered =
     search.trim().length === 0
@@ -21,14 +33,14 @@ export function CitySelect() {
     <Combobox
       store={combobox}
       onOptionSubmit={(val) => {
-        setValue(val);
-        setSearch(val);
+        setLocation(val); // 🔥 update parent
+        setSearch(val);   // update displayed value
         combobox.closeDropdown();
       }}
     >
       <Combobox.Target>
         <Input
-          placeholder={t('select-location')}
+          placeholder={t("select-location")}
           value={search}
           onChange={(event) => {
             const q = event.currentTarget.value;
@@ -48,7 +60,9 @@ export function CitySelect() {
               </Combobox.Option>
             ))
           ) : (
-            <Combobox.Empty>{t('nothing-found-for-typed-chars')}</Combobox.Empty>
+            <Combobox.Empty>
+              {t("nothing-found-for-typed-chars")}
+            </Combobox.Empty>
           )}
         </Combobox.Options>
       </Combobox.Dropdown>

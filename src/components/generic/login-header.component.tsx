@@ -30,6 +30,13 @@ const LoginMySkoolHeader: FC<NavbarSimpleProps> = ({
   const isSmallerThanSm = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`);
   const currentUser = useAppSelector((state) => state.auth.currentUser);
   const { setColorScheme, clearColorScheme } = useMantineColorScheme();
+
+  useEffect(() => {
+    if (currentUser === null) {
+      router.push("/");
+    }
+  }, [currentUser, router]);
+
   return (
     <Box h={{ base: 55, md: 55 }}>
       <div
@@ -48,7 +55,7 @@ const LoginMySkoolHeader: FC<NavbarSimpleProps> = ({
               hiddenFrom="sm"
               size="sm"
             />
-            
+
             <AppLogo
               logoPath={"/assets/images/logo.png"}
               alt={"Studify"}
@@ -75,7 +82,7 @@ const LoginMySkoolHeader: FC<NavbarSimpleProps> = ({
               />
             )}
             {/* <LanguageDropdown /> */}
-            <ThemeButton/>
+            <ThemeButton />
             {currentUser && <HeaderMenu />}
           </Group>
         </Group>
