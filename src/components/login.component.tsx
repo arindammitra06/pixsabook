@@ -52,7 +52,6 @@ export default function LoginPage() {
   const [otp, setOtp] = useState(null);
   const [otpError, setOtpError] = useState(false);
   const [userFound, setUserFound] = useState(null);
-  console.log(otp);
   const goToPage = (url: string) => {
     router.push(url);
   };

@@ -1,5 +1,5 @@
 INSERT INTO `pixsabook`.`User` (`id`, `userType`, `name`, `location`, `active`, `email`, `createdBy`, `updatedBy`) VALUES ('1', 'Admin', 'Arindam Mitra', 'Kolkata', 'Yes', 'arindammitra06@gmail.com', '1', '1');
-INSERT INTO `pixsabook`.`User` (`id`, `userType`, `name`, `location`, `active`, `email`, `createdBy`, `updatedBy`) VALUES ('2', 'Admin', 'Tamajit Das', 'Kolkata', 'Yes', 'tamajitdas1997@gmail.com', '1', '1');
+INSERT INTO `pixsabook`.`User` (`id`, `userType`, `name`, `location`, `active`, `email`, `createdBy`, `updatedBy`) VALUES ('2', 'Admin', 'Tamajit Das', 'Kolkata', 'Yes', 'tamajitsphotography@gmail.com', '1', '1');
 
 -- Subscriptions
 
