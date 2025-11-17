@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { BooleanFlag } from "@prisma/client";
 import { uploadImageToImageKit } from "@/utils/uploadImageToImageKit";
 import { v4 as uuidv4 } from "uuid";
+import imagekit from "@/utils/imagekitClient";
 
 // GET /api/master/getSubscriptionPlans
 export async function GET(req: NextRequest) {
@@ -24,38 +25,28 @@ export async function GET(req: NextRequest) {
 // POST /api/master/uploadImageToImageKit
 export async function POST(req: NextRequest) {
   try {
-    const contentType = req.headers.get("content-type") || "";
-
-    if (!contentType.includes("multipart/form-data")) {
-      return NextResponse.json(
-        { status: false, message: "Content-Type must be multipart/form-data" },
-        { status: 400 }
-      );
-    }
-
-    // Parse multipart form
-    const formData = await req.formData();
-    const file = formData.get("file") as File;
+    const form = await req.formData();
+    const file = form.get("file") as File;
 
     if (!file) {
       return NextResponse.json({ status: false, message: "No file provided" }, { status: 400 });
     }
 
-    const buffer = Buffer.from(await file.arrayBuffer());
+    const arrayBuffer = await file.arrayBuffer();
 
-    const uploadResponse = await uploadImageToImageKit(buffer, uuidv4() + file.name);
+    const upload = await imagekit.upload({
+      file: Buffer.from(arrayBuffer), // Must be buffer
+      fileName: uuidv4() + "-" + file.name,
+    });
 
     return NextResponse.json({
       status: true,
-      fileType: uploadResponse.fileType,
-      url: uploadResponse.url,
-      thumbnailUrl: uploadResponse.thumbnailUrl,
+      url: upload.url,
+      thumbnailUrl: upload.thumbnailUrl,
+      fileType: upload.fileType,
     });
-  } catch (error) {
-    console.error(error);
-    return NextResponse.json(
-      { status: false, message: "File upload error" },
-      { status: 500 }
-    );
+  } catch (err) {
+    console.error("Upload error:", err);
+    return NextResponse.json({ status: false, message: "Upload failed" }, { status: 500 });
   }
 }

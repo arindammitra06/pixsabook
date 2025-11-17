@@ -43,26 +43,21 @@ export const uploadImageToImageKit = createAsyncThunk<
     formData.append("file", file);
 
     const response = await axios.post(baseUrl + "master", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
       onUploadProgress: (event) => {
         const progress = Math.round((event.loaded * 100) / (event.total || 1));
         dispatch(setUploads([{ name: file.name, progress }]));
       },
     });
 
-    if (response.data?.status && response.data?.url) {
+    if (response.data?.status) {
       dispatch(setUploads([{ name: file.name, progress: 100, url: response.data.url }]));
-      return {
-        status:response.data?.status ,
-        url: response.data.url,
-        thumbnailUrl: response.data.thumbnailUrl,
-        fileType: response.data.fileType,
-      };
+      return response.data;
     }
 
     throw new Error("Upload failed for " + file.name);
   } catch (error: any) {
-    console.error(error);
-    return rejectWithValue(error.message || "Upload error");
+    return rejectWithValue(error.message);
   }
 });
 
@@ -76,24 +71,27 @@ export const uploadImagesSequentially = createAsyncThunk<
 
   try {
     for (const file of files) {
-      const uploadData: UploadProgress = { name: file.name, progress: 0 };
-      uploads = [...uploads, uploadData];
+      const entry: UploadProgress = { name: file.name, progress: 0 };
+      uploads = [...uploads, entry];
       dispatch(setUploads(uploads));
 
       const formData = new FormData();
       formData.append("file", file);
 
       const response = await axios.post(baseUrl + "master", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
         onUploadProgress: (event) => {
           const progress = Math.round((event.loaded * 100) / (event.total || 1));
-          uploads = uploads.map((u) => (u.name === file.name ? { ...u, progress } : u));
+          uploads = uploads.map((x) =>
+            x.name === file.name ? { ...x, progress } : x
+          );
           dispatch(setUploads(uploads));
         },
       });
 
-      if (response.data?.status && response.data?.url) {
-        uploads = uploads.map((u) =>
-          u.name === file.name ? { ...u, progress: 100, url: response.data.url } : u
+      if (response.data?.status) {
+        uploads = uploads.map((x) =>
+          x.name === file.name ? { ...x, progress: 100, url: response.data.url } : x
         );
         dispatch(setUploads(uploads));
       } else {
@@ -103,10 +101,10 @@ export const uploadImagesSequentially = createAsyncThunk<
 
     return uploads;
   } catch (error: any) {
-    console.error(error);
-    return rejectWithValue(error.message || "Upload failed");
+    return rejectWithValue(error.message);
   }
 });
+
 
 // Fetch subscription plans
 export const getSubscriptionPlans = createAsyncThunk<
