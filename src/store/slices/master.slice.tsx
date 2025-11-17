@@ -1,6 +1,13 @@
 import { baseUrl } from "@/utils/utils";
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import axios from "axios";
+import ImageKit from "imagekit";
+
+const imagekit = new ImageKit({
+  publicKey: process.env.NEXT_PUBLIC_IMAGEKIT_PUBLIC_KEY!,
+  privateKey: process.env.NEXT_PUBLIC_IMAGEKIT_PRIVATE_KEY!,
+  urlEndpoint: process.env.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT!,
+});
 
 export interface UploadProgress {
   name: string;
@@ -9,6 +16,7 @@ export interface UploadProgress {
 }
 
 export interface UploadedFile {
+  status: boolean,
   url: string;
   thumbnailUrl: string;
   fileType: string;
@@ -31,85 +39,97 @@ const initialState: MasterState = {
 };
 
 // Single file upload
+
 export const uploadImageToImageKit = createAsyncThunk<
   UploadedFile,
   { file: File },
   { rejectValue: string }
->("master/uploadImageToImageKit", async ({ file }, { dispatch, rejectWithValue }) => {
-  try {
-    dispatch(setUploads([{ name: file.name, progress: 0 }]));
+>(
+  "master/uploadImageToImageKit",
+  async ({ file }, { dispatch, rejectWithValue }) => {
+    try {
+      dispatch(setUploads([{ name: file.name, progress: 0 }]));
 
-    const formData = new FormData();
-    formData.append("file", file);
+      // 1. Get signature
+      const sigRes = await fetch("/api/imagekit-auth");
+      const { signature, expire, token } = await sigRes.json();
+      
+      // 2. Upload using v6 SDK
+      const uploaded = (await imagekit.upload({
+          file: file as any,
+          fileName: file.name,
+          signature,
+          expire,
+          token,
+          folder: "/pixsabook",
+        } as any)) as any;
+        dispatch(
+          setUploads([{ name: file.name, progress: 100, url: uploaded.url }]),
+        );
 
-    const response = await axios.post(baseUrl + "master", formData, {
-      headers: { "Content-Type": "multipart/form-data" },
-      onUploadProgress: (event) => {
-        const progress = Math.round((event.loaded * 100) / (event.total || 1));
-        dispatch(setUploads([{ name: file.name, progress }]));
-      },
-    });
+        const result: UploadedFile = {
+          status: uploaded.url!==null && uploaded.url!==undefined ? true : false,
+          url: uploaded.url,
+          thumbnailUrl: (uploaded.thumbnailUrl ??
+            uploaded.thumbnail ??
+            uploaded.url) as string,
+          fileType: (uploaded.fileType ?? file.type ?? "") as string,
+        };
+        return result;
 
-    if (response.data?.status) {
-      dispatch(setUploads([{ name: file.name, progress: 100, url: response.data.url }]));
-      return response.data;
+
+    } catch (err: any) {
+      return rejectWithValue(err.message);
     }
-
-    throw new Error("Upload failed for " + file.name);
-  } catch (error: any) {
-    return rejectWithValue(error.message);
-  }
-});
+  },
+);
 
 // Multiple files sequential upload
 export const uploadImagesSequentially = createAsyncThunk<
   UploadProgress[],
   File[],
   { rejectValue: string }
->("master/uploadImagesSequentially", async (files, { dispatch, rejectWithValue }) => {
-  let uploads: UploadProgress[] = [];
+>(
+  "master/uploadImagesSequentially",
+  async (files, { dispatch, rejectWithValue }) => {
+    let uploads: UploadProgress[] = [];
 
-  try {
-    for (const file of files) {
-      const entry: UploadProgress = { name: file.name, progress: 0 };
-      uploads = [...uploads, entry];
-      dispatch(setUploads(uploads));
+    try {
+      for (const file of files) {
+        uploads.push({ name: file.name, progress: 0 });
+        dispatch(setUploads([...uploads]));
 
-      const formData = new FormData();
-      formData.append("file", file);
+        // Get signature
+        const sigRes = await fetch("/api/imagekit-auth");
+        const { signature, expire, token } = await sigRes.json();
 
-      const response = await axios.post(baseUrl + "master", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-        onUploadProgress: (event) => {
-          const progress = Math.round((event.loaded * 100) / (event.total || 1));
-          uploads = uploads.map((x) =>
-            x.name === file.name ? { ...x, progress } : x
-          );
-          dispatch(setUploads(uploads));
-        },
-      });
+        // Upload
+        const uploaded = (await imagekit.upload({
+          file: file as any,
+          fileName: file.name,
+          signature,
+          expire,
+          token,
+          folder: "/pixsabook",
+        } as any)) as any;
 
-      if (response.data?.status) {
-        uploads = uploads.map((x) =>
-          x.name === file.name ? { ...x, progress: 100, url: response.data.url } : x
+        uploads = uploads.map((u) =>
+          u.name === file.name ? { ...u, progress: 100, url: uploaded.url } : u,
         );
-        dispatch(setUploads(uploads));
-      } else {
-        throw new Error("Upload failed for " + file.name);
+        dispatch(setUploads([...uploads]));
       }
+
+      return uploads;
+    } catch (err: any) {
+      return rejectWithValue(err.message);
     }
-
-    return uploads;
-  } catch (error: any) {
-    return rejectWithValue(error.message);
-  }
-});
-
+  },
+);
 
 // Fetch subscription plans
 export const getSubscriptionPlans = createAsyncThunk<
   any[], // return type
-  void,              // no arguments
+  void, // no arguments
   { rejectValue: string }
 >("master/getSubscriptionPlans", async (_, { rejectWithValue }) => {
   try {
@@ -117,7 +137,9 @@ export const getSubscriptionPlans = createAsyncThunk<
     return response.data; // array of plans
   } catch (error: any) {
     console.error(error);
-    return rejectWithValue(error.message || "Failed to fetch subscription plans");
+    return rejectWithValue(
+      error.message || "Failed to fetch subscription plans",
+    );
   }
 });
 const masterSlice = createSlice({
@@ -146,7 +168,7 @@ const masterSlice = createSlice({
       })
       .addCase(uploadImageToImageKit.rejected, (state, action) => {
         state.fileUploading = false;
-        state.error = action.payload || "Upload failed";
+       // state.error = action.payload || "Upload failed";
       })
       // Multiple uploads
       .addCase(uploadImagesSequentially.pending, (state) => {
